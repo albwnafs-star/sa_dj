@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>نافس جيبوتي</title>
+    <!-- Font Awesome 6 (مجانية للأيقونات) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: خط عربي جميل -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                processEscapes: true
+            }
+        };
+
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden; /* لمنع التمرير أثناء عرض شاشة البدء */
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(145deg, #f0f7ff 0%, #e9eef5 100%);
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        /* الحاوية الرئيسية */
+        .app-container {
+            display: none; /* مخفية حتى يتم النقر على ابدأ */
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* شاشة البدء */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4338ca, #6366f1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        .welcome-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+        .start-btn {
+            margin-top: 2rem;
+            padding: 1rem 3rem;
+            font-size: 1.3rem;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 3rem;
+            cursor: pointer;
+            font-weight: 800;
+            transition: transform 0.2s, background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .start-btn:hover { background: #d97706; transform: scale(1.05); }
+
+        /* الهيدر */
+        .header {
+            background: linear-gradient(135deg, #4338ca, #6366f1);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .logo-area i {
+            font-size: 2.2rem;
+        }
+        .logo-area h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+        }
+        .header-info {
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+        .score-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .score-badge i {
+            margin-left: 0.5rem;
+        }
+
+        /* التخطيط الداخلي: جانب + محتوى */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+        }
+
+        /* الشريط الجانبي للفصول */
+        .sidebar {
+            flex: 1;
+            min-width: 260px;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+        .sidebar h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.3rem;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .chapter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .chapter-btn {
+            background: #f8fafc;
+            border: none;
+            text-align: right;
+            padding: 0.9rem 1rem;
+            border-radius: 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            color: #1e293b;
+        }
+        .chapter-btn i {
+            font-size: 1.2rem;
+            color: #4338ca;
+        }
+        .chapter-btn.active {
+            background: #4338ca;
+            color: white;
+        }
+        .chapter-btn.active i {
+            color: white;
+        }
+        .chapter-btn:hover:not(.active) {
+            background: #e2e8f0;
+            transform: translateX(-4px);
+        }
+
+        /* منطقة المحتوى الرئيسي */
+        .main-content {
+            flex: 3;
+            min-width: 280px;
+        }
+
+        /* بطاقة المخرجات (نتاجات التعلم) */
+        .outcomes-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.3rem 1.8rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-right: 8px solid #f59e0b;
+        }
+        .outcomes-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: #4338ca;
+        }
+
+        /* حاوية الأسئلة */
+        .questions-panel {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .questions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px dashed #cbd5e1;
+        }
+        .questions-header h2 {
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .progress {
+            background: #e2e8f0;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .progress-bar-wrapper {
+            flex-basis: 100%;
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4338ca, #6366f1);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* كل سؤال */
+        .question-item {
+            background: #fefefe;
+            border: 1px solid #eef2ff;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+        /* تأثير الحركة عند ظهور السؤال */
+        @keyframes questionAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: questionAppear 0.4s ease-out forwards;
+        }
+
+        .question-text {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: baseline;
+        }
+        .q-num {
+            background: #4338ca;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.8rem;
+            margin-right: 1.8rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f8fafc;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid #e2e8f0;
+        }
+        .option-label:hover {
+            background: #e6edf7;
+        }
+        input[type="radio"] {
+            accent-color: #4338ca;
+            width: 1rem;
+            height: 1rem;
+        }
+        .answer-feedback {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            margin-right: 1.8rem;
+            color: #4b5563;
+        }
+
+        /* أزرار التحكم */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .btn {
+            border: none;
+            padding: 0.7rem 1.6rem;
+            border-radius: 2rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .btn-primary {
+            background: #4338ca;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        /* بطاقة النتيجة */
+        .results-card {
+            background: linear-gradient(120deg, #ecfdf5, #e0f2fe);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            border: 1px solid #a7f3d0;
+        }
+        .results-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .final-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #0f3b5c;
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: #5b6e8c;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 780px) {
+            .welcome-content {
+                padding: 1.5rem;
+                margin: 1rem;
+                border-radius: 1.5rem;
+            }
+            .welcome-content h1 {
+                font-size: 2rem !important;
+            }
+            .welcome-content i {
+                font-size: 3rem !important;
+            }
+            
+            .options {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .sidebar, .main-content {
+                flex: 1 1 100%;
+            }
+            .sidebar {
+                position: static;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            .report-table td:nth-child(3) { /* ناتج التعلم */
+                min-width: 200px;
+                white-space: normal;
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- شاشة البدء -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-content fade-in">
+            <i class="fas fa-rocket" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+            <h2 style="margin-bottom: 1rem;">مرحباً بك عزيزي الطالب في</h2>
+            <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">نافس جيبوتي</h1>
+            <div style="font-size: 1.3rem; line-height: 1.8; margin-bottom: 2rem;">
+                <p>المدرسة السعودية في جيبوتي</p>
+                <p>الصف السادس الابتدائي</p>
+                <p>مادة العلوم</p>
+                <p>معلم المادة : أ. محمود حسن الدبعي</p>
+            </div>
+            <button class="start-btn" id="startAppBtn">ابدأ الآن <i class="fas fa-play"></i></button>
+        </div>
+    </div>
+
+<div class="app-container" id="appContainer">
+    <div class="header">
+        <div class="logo-area">
+            <i class="fas fa-book-open"></i>
+            <div>
+                <h1>نافس جيبوتي 🧮</h1>
+                <p class="header-info">المدرسة السعودية في جيبوتي - الصف السادس الابتدائي</p>
+                <p class="header-info">مادة العلوم - معلم المادة الأستاذ محمود الدبعي</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="score-badge" id="globalScoreBadge">
+                <i class="fas fa-chart-line"></i> <span id="globalScoreSpan">0</span> / <span id="totalQuestionsSpan">0</span>
+            </div>
+        </div>        
+    </div>
+
+    <div class="dashboard">
+        <!-- القائمة الجانبية -->
+        <div class="sidebar">
+            <h3><i class="fas fa-layer-group"></i> الفصول</h3>
+            <div class="chapter-list" id="chapterList"></div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <div class="outcomes-card" id="instructionsCard" style="border-right-color: #10b981; margin-bottom: 1rem;">
+                <h3><i class="fas fa-info-circle"></i> تعليمات الاستخدام</h3>
+                <ol style="padding-right: 1.5rem; margin-top: 0.5rem; color: #4b5563; font-size: 0.95rem; line-height: 1.8;">
+                    <li>قم باختيار <strong>المجال</strong> من القائمة الجانبية.</li>
+                    <li>من القائمة المنسدلة، اختر <strong>ناتج التعلم</strong> المخصص للبدء.</li>
+                    <li>تأكيد الإجابات عند اكتمال المستوى لحساب النتيجة.</li>
+                    <li>يمكنك معرفة الأسئلة غير الصحيحة وإعادة الإجابة عنها لتحسين مستواك.</li>
+                    <li>يمكنك عرض النتيجة النهائية وإضافة اسمك وحفظ التقرير (PDF) لإرساله لمعلمك.</li>
+                </ol>
+                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.85rem;" onclick="document.getElementById('instructionsCard').style.display='none'">
+                        إخفاء التعليمات <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="outcomes-card" id="outcomesCard">
+                <h3><i class="fas fa-bullseye"></i> نواتج التعلم</h3>
+                <select id="outcomesSelect" class="form-input" style="width: 100%; max-width: 100%; padding: 0.7rem; border: 1px solid #e2e8f0; margin-top: 0.5rem; border-radius: 1rem; cursor: pointer; color: #4338ca; font-weight: 500; outline: none; background-color: #f8fafc; overflow: hidden; text-overflow: ellipsis;">
+                    <option value="" disabled selected>اختر ناتج تعلم للبدء...</option>
+                </select>
+            </div>
+
+            <div class="questions-panel" id="questionsPanel">
+                <div class="questions-header">
+                    <h2><i class="fas fa-question-circle"></i> <span id="chapterTitle"></span></h2>
+                    <div class="progress" id="progressIndicator"></div>
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
+                <div id="questionsContainer"></div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="submitAnswersBtn"><i class="fas fa-check-circle"></i> تأكيد الإجابات وحساب النتيجة</button>
+                    <button class="btn btn-secondary" id="resetChapterBtn"><i class="fas fa-undo-alt"></i> إعادة تعيين إجابات هذا الفصل</button>
+                    <button class="btn btn-warning" id="showResultsBtn"><i class="fas fa-trophy"></i> عرض النتيجة النهائية</button>
+                </div>
+                <div id="resultsArea"></div>
+            </div>
+        </div>
+    </div>
+    <footer>⭐ اختبار ذاتي – أجب عن الأسئلة ثم احصل على نتيجتك الفورية لكل فصل</footer>
+</div>
+
+<script>
+    // ======================= قاعدة البيانات الكاملة كما وردت (مع تصحيح بعض التكرارات الطفيفة) =======================
+    const chaptersData = [
+        {
+            id: 1,
+            title: "مجال علوم الحياة",
+            outcomes: [
+                "ناتج التعلم (1-1-1-5-6): وصف تركيب الخلية وربطها بوظائفها الحيوية.",
+
+"ناتج التعلم (2-1-1-5-6): تحديد الاختلافات الأساسية من حيث التركيب والوظيفة بين الخلية النباتية والخلية الحيوانية.",
+
+"ناتج التعلم (3-1-1-5-6): تحديد أجهزة الجسم الرئيسة وأعضائها المتخصصة وربطها بوظائفها لدعم نمو المخلوقات الحية (النبات والحيوان) وبقائها.",
+
+"ناتج التعلم (4-1-1-5-6): وصف الأنماط المختلفة لدورات حياة الحيوانات والنباتات والتغيرات المصاحبة لها، والمقارنة بينها.",
+
+"ناتج التعلم (1-2-1-5-6): تصنيف المخلوقات الحية إلى مجموعات بناءً على صفاتها الظاهرية المشتركة.",
+
+"ناتج التعلم (1-3-1-5-6): تمثيل المجتمع الحيوي، وتحديد الجماعات الحيوية التي تعيش فيه، ووصف علاقاتها المتبادلة وتفاعلها مع المكونات غير الحيوية.",
+
+"ناتج التعلم (2-3-1-5-6): وصف مكونات النظام البيئي، وتفسير أثر توافر الموارد على بقاء المخلوقات، واقتراح حلول للمشكلات المؤثرة في استقرار النظام.",
+
+"ناتج التعلم (3-3-1-5-6): تمثيل العلاقات التي تؤدي إلى تدوير المادة، وتحديد العلاقات بين النباتات وطاقة الشمس لإنتاج الغذاء.",
+
+"ناتج التعلم (4-3-1-5-6): وصف تأثير التغيرات البيئية على النباتات والحيوانات، واستنتاج دور التكيفات التركيبية والسلوكية في بقائها.",
+
+"ناتج التعلم (5-3-1-5-6): استنتاج تأثير النشاط الإنساني في المواطن والجماعات البيئية، وتوقع أثرها، واقتراح الحلول لحمايتها.",
+
+"ناتج التعلم (1-4-1-5-6): التعرف على وراثة الصفات، وتفسير التباين فيها، وتتبع انتقالها، والتمييز بين الصفات السائدة والمتنحية، وتوضيح أثر البيئة."
+                            ],
+            questions: [
+  { id: 1, q: "ما هي الوحدة الأساسية للمخلوق الحي؟", options: ["النسيج", "الخلية", "العضو", "الجهاز"], correct: 1 },
+  { id: 2, q: "أي جزء في الخلية يتحكم في جميع أنشطتها ويحتوي على المادة الوراثية؟", options: ["السيتوبلازم", "النواة", "الغشاء الخلوي", "الفجوة العصارية"], correct: 1 },
+  { id: 3, q: "ما وظيفة الغشاء الخلوي في الخلية؟", options: ["صنع الغذاء", "تخزين الماء", "حماية الخلية وتنظيم مرور المواد", "توليد الطاقة"], correct: 2 },
+  { id: 4, q: "مادة هلامية توجد داخل الخلية وتحتوي على العضيات:", options: ["الجدار الخلوي", "النواة", "السيتوبلازم", "الميتوكندريا"], correct: 2 },
+  { id: 5, q: "تُعرف العضية المسؤولة عن إنتاج الطاقة في الخلية بـ:", options: ["البلاستيدات", "الميتوكندريا", "الفجوات", "النواة"], correct: 1 },
+  { id: 6, q: "أي مما يلي يوجد في الخلية النباتية ولا يوجد في الخلية الحيوانية؟", options: ["النواة", "الغشاء الخلوي", "الجدار الخلوي", "السيتوبلازم"], correct: 2 },
+  { id: 7, q: "حسب نظرية الخلية، تنتج الخلايا الجديدة من:", options: ["الهواء", "خلايا موجودة سابقاً", "الغذاء", "الماء"], correct: 1 },
+  { id: 8, q: "أي المخلوقات التالية يُعد وحيد الخلية؟", options: ["البكتيريا", "النملة", "شجرة التفاح", "الحصان"], correct: 0 },
+  { id: 9, q: "ما وظيفة الفجوة العصارية في الخلية؟", options: ["التكاثر", "تخزين الغذاء والماء والفضلات", "بناء البروتين", "الحركة"], correct: 1 },
+  { id: 10, q: "مجموعة الخلايا المتشابهة التي تؤدي الوظيفة نفسها تسمى:", options: ["عضواً", "جهازاً", "نسيجاً", "مخلوقاً"], correct: 2 },
+  { id: 11, q: "أي جزء يربط بين تركيب الخلية ووظيفتها في صنع الغذاء؟", options: ["الميتوكندريا", "البلاستيدات الخضراء", "الجدار الخلوي", "النواة"], correct: 1 },
+  { id: 12, q: "المخلوقات عديدة الخلايا هي التي:", options: ["تتكون من خلية واحدة", "تتكون من خلايا كثيرة", "لا تحتوي على خلايا", "تنتج من الجمادات"], correct: 1 },
+  { id: 13, q: "لماذا تختلف أشكال الخلايا في جسم الإنسان؟", options: ["بسبب لونها", "لتناسب الوظيفة التي تؤديها", "بسبب عمر الشخص", "بسبب البيئة الخارجية"], correct: 1 },
+  { id: 14, q: "أي العضيات التالية تقوم بعملية التنفس الخلوي؟", options: ["النواة", "الميتوكندريا", "البلاستيدات", "السيتوبلازم"], correct: 1 },
+  { id: 15, q: "الجزء الذي يعطي الخلية النباتية شكلها الصندوقي الصلب هو:", options: ["الغشاء الخلوي", "النواة", "الجدار الخلوي", "الفجوة"], correct: 2 },
+  { id: 16, q: "أين تقع الكروموسومات داخل الخلية؟", options: ["في السيتوبلازم", "في النواة", "في الميتوكندريا", "خارج الغشاء"], correct: 1 },
+  { id: 17, q: "ما العملية التي تستخدمها الخلية لنقل المواد عبر الغشاء دون طاقة؟", options: ["النقل النشط", "النقل السلبي", "التمثيل الضوئي", "التنفس"], correct: 1 },
+  { id: 18, q: "العضو هو مجموعة من:", options: ["الأجهزة", "الأنسجة المختلفة", "الخلايا المفردة", "الذرات"], correct: 1 },
+  { id: 19, q: "أي من هؤلاء العلماء ساهم في تطوير نظرية الخلية؟", options: ["نيوتن", "ليفنهوك", "أينشتاين", "أديسون"], correct: 1 },
+  { id: 20, q: "تحصل الخلية على الطاقة من الغذاء بعملية تسمى:", options: ["البناء الضوئي", "التنفس الخلوي", "الهضم", "النمو"], correct: 1 },
+
+  { id: 1, q: "أي تركيب يعطي الخلية النباتية لونها الأخضر؟", options: ["النواة", "البلاستيدات الخضراء", "الجدار الخلوي", "الميتوكندريا"], correct: 1 },
+  { id: 2, q: "يوجد الجدار الخلوي في الخلية النباتية لتوفير:", options: ["الطاقة", "الدعامة والحماية", "الغذاء", "التكاثر"], correct: 1 },
+  { id: 3, q: "تتميز الفجوة العصارية في الخلية النباتية بأنها:", options: ["صغيرة جداً", "كبيرة وتشغل مساحة واسعة", "غير موجودة", "متعددة وصغيرة"], correct: 1 },
+  { id: 4, q: "أي مما يلي موجود في الخلية الحيوانية وغائب في الخلية النباتية؟", options: ["النواة", "المريكزات (الأجسام المركزية)", "الغشاء الخلوي", "السيتوبلازم"], correct: 1 },
+  { id: 5, q: "الخلية التي لا تستطيع صنع غذائها بنفسها هي الخلية:", options: ["النباتية", "الحيوانية", "البكتيرية الخضراء", "الطحلبية"], correct: 1 },
+  { id: 6, q: "لماذا لا تحتاج الخلية الحيوانية إلى جدار خلوي؟", options: ["لأنها لا تنمو", "لأن لها هياكل تدعمها أو تنتقل لمكان آخر", "لأنها صغيرة جداً", "لأنها تعيش في الماء فقط"], correct: 1 },
+  { id: 7, q: "ما وجه الشبه الرئيسي بين الخلية النباتية والحيوانية؟", options: ["وجود البلاستيدات", "وجود الجدار الخلوي", "وجود الغشاء الخلوي والنواة", "شكل الخلية الصندوقي"], correct: 2 },
+  { id: 8, q: "أي التراكيب التالية يسمح للنبات بالاستفادة من ضوء الشمس؟", options: ["الميتوكندريا", "الفجوة", "البلاستيدات", "الجهاز الجولجي"], correct: 2 },
+  { id: 9, q: "تكون الفجوات في الخلايا الحيوانية:", options: ["واحدة كبيرة", "معدومة", "صغيرة وكثيرة", "خضراء اللون"], correct: 2 },
+  { id: 10, q: "ما وظيفة البلاستيدات الخضراء في الخلية النباتية؟", options: ["التنفس", "إنتاج الغذاء (السكر)", "تخزين الفضلات", "حماية النواة"], correct: 1 },
+  { id: 11, q: "إذا فحصت خلية تحت المجهر ووجدت لها شكلاً هندسياً منتجماً، فهي غالباً:", options: ["خلية دم", "خلية عصبية", "خلية نباتية", "بكتيريا"], correct: 2 },
+  { id: 12, q: "أي جزء في الخلية النباتية يشبه (السور) المحيط بالمدينة؟", options: ["النواة", "الجدار الخلوي", "السيتوبلازم", "الفجوة"], correct: 1 },
+  { id: 13, q: "تحتوي الخلايا الحيوانية على غشاء خلوي فقط، بينما النباتية تحتوي على:", options: ["غشاء خلوي وجدار خلوي", "جدار خلوي فقط", "بلاستيدات فقط", "ميتوكندريا فقط"], correct: 0 },
+  { id: 14, q: "أي من هذه المكونات هو المسؤول عن حدوث عملية البناء الضوئي؟", options: ["السيتوبلازم", "البلاستيدات", "النواة", "الغشاء"], correct: 1 },
+  { id: 15, q: "لماذا تظهر أوراق النبات باللون الأخضر؟", options: ["بسبب الماء", "بسبب مادة الكلوروفيل في البلاستيدات", "بسبب ضوء الشمس الأصفر", "بسبب الجدار الخلوي"], correct: 1 },
+  { id: 16, q: "التركيب الذي يتحكم في دخول وخروج المواد في كلا الخليتين هو:", options: ["الجدار الخلوي", "الغشاء الخلوي", "الميتوكندريا", "النواة"], correct: 1 },
+  { id: 17, q: "أي مما يلي لا يوجد في خلية جلد الإنسان؟", options: ["نواة", "ميتوكندريا", "جدار خلوي", "غشاء خلوي"], correct: 2 },
+  { id: 18, q: "الجزء الذي يشغل معظم مساحة الخلية النباتية هو:", options: ["النواة", "الفجوة العصارية", "الميتوكندريا", "البلاستيدة"], correct: 1 },
+  { id: 19, q: "يساعد الجدار الخلوي النبات على:", options: ["الحركة", "الوقوف بشكل قائم ودعم الأنسجة", "جذب الحشرات", "امتصاص الماء"], correct: 1 },
+  { id: 20, q: "أي المقارنات التالية صحيحة؟", options: ["النباتية: فجوة صغيرة | الحيوانية: فجوة كبيرة", "النباتية: بلاستيدات | الحيوانية: لا يوجد بلاستيدات", "النباتية: لا يوجد جدار | الحيوانية: يوجد جدار", "النباتية: مستديرة | الحيوانية: مربعة"], correct: 1 },
+  { id: 1, q: "ما هو الجهاز المسؤول عن نقل الأكسجين والغذاء إلى جميع خلايا الجسم؟", options: ["الهضمي", "التنفسي", "الدوراني", "العصبي"], correct: 2 },
+  { id: 2, q: "العضو الرئيسي في الجهاز التنفسي هو:", options: ["القلب", "المعدة", "الرئتان", "الكبد"], correct: 2 },
+  { id: 3, q: "يتم امتصاص الماء والأملاح في الجهاز الهضمي من خلال:", options: ["المعدة", "الأمعاء الغليظة", "المريء", "الفم"], correct: 1 },
+  { id: 4, q: "ما وظيفة الجهاز الهيكلي (العظام)؟", options: ["هضم الطعام", "دعم الجسم وحماية الأعضاء الداخلية", "نقل الدم", "إرسال الإشارات"], correct: 1 },
+  { id: 5, q: "يتكون الجهاز العصبي بشكل رئيسي من:", options: ["القلب والأوعية", "الدماغ والأعصاب", "العضلات والعظام", "الرئتين"], correct: 1 },
+  { id: 6, q: "ما العضو الذي يضخ الدم في جسم الإنسان؟", options: ["الكليتان", "الرئتان", "القلب", "المعدة"], correct: 2 },
+  { id: 7, q: "أي جهاز يقوم بتخليص الجسم من الفضلات الضارة؟", options: ["الجهاز الإخراجي", "الجهاز العضلي", "الجهاز الهيكلي", "الجهاز الهضمي"], correct: 0 },
+  { id: 8, q: "يحدث تبادل الغازات (الأكسجين وثاني أكسيد الكربون) في:", options: ["المعدة", "الحويصلات الهوائية بالرئتين", "الأمعاء", "القلب"], correct: 1 },
+  { id: 9, q: "العضو المسؤول عن تنقية الدم من الفضلات السائلة وتكوين البول هو:", options: ["القلب", "المثانة", "الكلية", "الكبد"], correct: 2 },
+  { id: 10, q: "الجهاز الذي يمكننا من الحركة هو:", options: ["الجهاز الهضمي", "الجهاز العضلي الهيكلي", "الجهاز التنفسي", "الجهاز الدوري"], correct: 1 },
+  { id: 11, q: "ما العضو الذي يبدأ فيه هضم المواد الكربوهيدراتية؟", options: ["المعدة", "الفم", "المريء", "الأمعاء"], correct: 1 },
+  { id: 12, q: "أي الأجهزة التالية يتحكم في جميع أجهزة الجسم الأخرى؟", options: ["الجهاز العصبي", "الجهاز الدوري", "الجهاز التنفسي", "الجهاز الهيكلي"], correct: 0 },
+  { id: 13, q: "وظيفة الأوعية الدموية هي:", options: ["دعم الجسم", "نقل الدم", "هضم الطعام", "حماية الدماغ"], correct: 1 },
+  { id: 14, q: "أين يتم هضم الطعام وتحويله إلى سائل في الجهاز الهضمي؟", options: ["المريء", "المعدة", "الفم", "الأمعاء الغليظة"], correct: 1 },
+  { id: 15, q: "الجزء الذي يربط العظام بالعضلات يسمى:", options: ["العصب", "الوتر", "الوعاء الدموي", "الجلد"], correct: 1 },
+  { id: 16, q: "أي الأجهزة التالية يوجد في النبات ويقوم بنقل الماء من الجذور؟", options: ["الجهاز الهضمي", "الجهاز الوعائي (الخشب)", "الجهاز التنفسي", "الجهاز الهيكلي"], correct: 1 },
+  { id: 17, q: "ما وظيفة الجلد في جسم الإنسان؟", options: ["الهضم", "الحماية وتنظيم الحرارة", "التنفس", "ضخ الدم"], correct: 1 },
+  { id: 18, q: "يتعاون الجهازان الهيكلي والعضلي معاً من أجل:", options: ["الهضم", "الحركة", "التفكير", "الإخراج"], correct: 1 },
+  { id: 19, q: "العضو المسؤول عن امتصاص معظم الغذاء المهضوم هو:", options: ["المعدة", "الأمعاء الدقيقة", "المريء", "الأمعاء الغليظة"], correct: 1 },
+  { id: 20, q: "ما هي وظيفة الحجاب الحاجز؟", options: ["المساعدة في عملية التنفس", "هضم البروتين", "حماية القلب", "تخزين الدم"], correct: 0 },
+  { id: 1, q: "أي من الحيوانات التالية تمر بمرحلة (العذراء) في دورة حياتها؟", options: ["السمكة", "الفراشة", "الدجاجة", "القطة"], correct: 1 },
+  { id: 2, q: "تسمى التغيرات التي يمر بها المخلوق الحي في مراحل حياته:", options: ["نمواً", "تكاثراً", "دورة حياة", "تحولاً"], correct: 2 },
+  { id: 3, q: "ما هو أول طور في دورة حياة معظم النباتات؟", options: ["البذرة", "الزهرة", "الثمرة", "البادرة"], correct: 0 },
+  { id: 4, q: "تمر الضفادع بنوع من التحول يسمى التحول:", options: ["الناقص", "الكامل", "السريع", "المفاجئ"], correct: 1 },
+  { id: 5, q: "ماذا يخرج من بيضة الفراشة؟", options: ["فراشة صغيرة", "عذراء", "يرقة", "بيضة أخرى"], correct: 2 },
+  { id: 6, q: "الحيوان الذي يشبه والديه تماماً عند ولادته هو:", options: ["الضفدع", "الخنفساء", "السلحفاة", "النحلة"], correct: 2 },
+  { id: 7, q: "الجزء في النبات المسؤول عن إنتاج البذور هو:", options: ["الجذر", "الساق", "الزهرة", "الورقة"], correct: 2 },
+  { id: 8, q: "أي مرحلة تلي مرحلة اليرقة في التحول الكامل؟", options: ["البيضة", "الحشرة الكاملة", "العذراء", "البادرة"], correct: 2 },
+  { id: 9, q: "النباتات المعمرة هي التي تعيش:", options: ["فصلاً واحداً", "أقل من سنة", "لسنوات عديدة", "شهراً واحداً"], correct: 2 },
+  { id: 10, q: "ما هو 'أبو ذنيبة'؟", options: ["نوع من السمك", "مرحلة في دورة حياة الضفدع", "حشرة زاحفة", "جزء من نبات"], correct: 1 },
+  { id: 11, q: "ما الوظيفة الأساسية للثمار في النباتات؟", options: ["صنع الغذاء", "حماية البذور وتساعد في انتشارها", "امتصاص الضوء", "تثبيت النبات"], correct: 1 },
+  { id: 12, q: "أي الحيوانات التالية يتكاثر بالبيوض؟", options: ["الحصان", "الحوت", "التمساح", "الفأر"], correct: 2 },
+  { id: 13, q: "عملية انتقال حبوب اللقاح من المتك إلى الميسم تسمى:", options: ["إنباتاً", "تلقيحاً", "تحولاً", "إخصاباً"], correct: 1 },
+  { id: 14, q: "مرحلة التحول التي لا يمر بها الجراد هي:", options: ["البيضة", "الحورية", "العذراء", "الحشرة الكاملة"], correct: 2 },
+  { id: 15, q: "ماذا تسمى صغار الحشرات التي تشبه أبويها ولكن ليس لها أجنحة؟", options: ["يرقة", "حورية", "عذراء", "بادرة"], correct: 1 },
+  { id: 16, q: "أين تنمو النباتات اللابذرية؟", options: ["في الصحاري الجافة", "من الأبواغ", "من الأزهار فقط", "من الثمار"], correct: 1 },
+  { id: 17, q: "أي مما يلي يصف دورة حياة الإنسان؟", options: ["تحول كامل", "تحول ناقص", "نمو مباشر دون تحول", "تكاثر بالأبواغ"], correct: 2 },
+  { id: 18, q: "الظروف الضرورية لإنبات البذرة هي:", options: ["الماء والحرارة المناسبة", "الظلام الشديد", "الرياح القوية", "التربة المالحة"], correct: 0 },
+  { id: 19, q: "تحصل اليرقة على الطاقة لكي تنمو من:", options: ["النوم", "أكل كميات كبيرة من أوراق النبات", "ضوء الشمس مباشرة", "شرب الماء فقط"], correct: 1 },
+  { id: 20, q: "ما الفرق بين التحول الكامل والتحول الناقص؟", options: ["عدد الأرجل", "عدد مراحل دورة الحياة والشكل", "مكان العيش", "نوع الغذاء"], correct: 1 },
+  { id: 1, q: "ما هو أعلى مستوى في تصنيف المخلوقات الحية؟", options: ["المملكة", "النظام", "الطائفة", "النوع"], correct: 0 },
+  { id: 2, q: "المخلوقات التي تتشابه في شكلها وتستطيع التكاثر فيما بينها لإنتاج نسل خصب تسمى:", options: ["الجنس", "الرتبة", "النوع", "العائلة"], correct: 2 },
+  { id: 3, q: "أي الممالك التالية تضم مخلوقات حية تصنع غذاءها بنفسها ولا تتحرك من مكانها؟", options: ["المملكة الحيوانية", "المملكة النباتية", "مملكة الفطريات", "مملكة الطلائعيات"], correct: 1 },
+  { id: 4, q: "تصنف الحيوانات التي لها عمود فقري ضمن مجموعة:", options: ["اللافقاريات", "الحشرات", "الفقاريات", "الرخويات"], correct: 2 },
+  { id: 5, q: "إلى أي مجموعة ينتمي العقرب والعنكبوت؟", options: ["الحشرات", "القشريات", "العنكبيات (المفصليات)", "الديدان"], correct: 2 },
+  { id: 6, q: "أي من الحيوانات التالية يعتبر من الثدييات التي تبيض؟", options: ["الحوت", "منقار البط (الخلد)", "الكنغر", "الخفاش"], correct: 1 },
+  { id: 7, q: "الفطريات تختلف عن النباتات في أنها:", options: ["لا تتحرك", "لا تحتوي على كلوروفيل ولا تصنع غذاءها بنفسها", "تعيش في التربة", "تتكاثر بالأبواغ"], correct: 1 },
+  { id: 8, q: "المخلوقات الحية الدقيقة التي تعيش في ظروف قاسية (مثل الينابيع الحارة) تسمى:", options: ["البكتيريا البدائية", "الفطريات", "الطلائعيات", "الفيروسات"], correct: 0 },
+  { id: 9, q: "أي الحيوانات التالية يمتلك جلداً جافاً مغطى بالحراشف؟", options: ["البرمائيات", "الأسماك", "الزواحف", "الثدييات"], correct: 2 },
+  { id: 10, q: "تصنف الأميبا والبراميسيوم ضمن مملكة:", options: ["الفطريات", "البكتيريا", "الطلائعيات", "النباتات"], correct: 2 },
+  { id: 11, q: "أي المجموعات التالية جميع أفرادها لا فقاريات؟", options: ["الأسماك، الطيور، الزواحف", "الرخويات، المفصليات، الديدان", "الثدييات، البرمائيات، الحشرات", "الطيور، النحل، الخفافيش"], correct: 1 },
+  { id: 12, q: "الحيوانات ثابتة درجة الحرارة هي:", options: ["الأسماك والزواحف", "البرمائيات والحشرات", "الطيور والثدييات", "الرخويات والديدان"], correct: 2 },
+  { id: 13, q: "يُصنف نبات العرعر ونبات الصنوبر ضمن النباتات:", options: ["الزهرية", "معراة البذور (مخروطيات)", "اللابذرية", "الحزازية"], correct: 1 },
+  { id: 14, q: "ما هي الصفة المشتركة بين جميع أنواع الأسماك؟", options: ["لها رئات", "تتنفس عن طريق الخياشيم", "تعيش في اليابسة", "لها جلد مغطى بالشعر"], correct: 1 },
+  { id: 15, q: "الحيوانات التي تبدأ حياتها في الماء وتنتقل لليابسة عند البلوغ هي:", options: ["الزواحف", "البرمائيات", "الطيور", "الرخويات"], correct: 1 },
+  { id: 16, q: "أي مما يلي لا يعتبر من الممالك الست للمخلوقات الحية؟", options: ["الفطريات", "البكتيريا", "الصخور", "الطلائعيات"], correct: 2 },
+  { id: 17, q: "المفتاح التصنيفي يستخدمه العلماء لـ:", options: ["قياس طول المخلوق", "تحديد هوية المخلوق الحي وتصنيفه", "رسم المخلوق الحي", "حساب عدد المخلوقات"], correct: 1 },
+  { id: 18, q: "الاسم العلمي للمخلوق الحي يتكون من:", options: ["المملكة والنوع", "الجنس والنوع", "الطائفة والرتبة", "العائلة والجنس"], correct: 1 },
+  { id: 19, q: "أي المخلوقات التالية يمتلك هيكلاً خارجياً صلباً للحماية؟", options: ["السمكة", "السرطان (المفصليات)", "الأفعى", "العصفور"], correct: 1 },
+  { id: 20, q: "تنتمي الخميرة التي تستخدم في صنع الخبز إلى مملكة:", options: ["النباتات", "الطلائعيات", "الفطريات", "البكتيريا"], correct: 2 },
+  { id: 1, q: "جميع أفراد النوع الواحد الذين يعيشون في نظام بيئي معين يسمون:", options: ["مجتمعاً حيوياً", "جماعة حيوية", "نظاماً بيئياً", "موطناً"], correct: 1 },
+  { id: 2, q: "تسمى مجموعة الجماعات الحيوية التي تعيش في نظام بيئي واحد وتتفاعل معاً:", options: ["الجماعة الحيوية", "المجتمع الحيوي", "الغلاف الحيوي", "المنطقة الحيوية"], correct: 1 },
+  { id: 3, q: "المكان الذي يعيش فيه المخلوق الحي ويحصل منه على احتياجاته يسمى:", options: ["الإطار البيئي", "المجتمع", "الموطن", "المحيط"], correct: 2 },
+  { id: 4, q: "العلاقة التي يستفيد فيها كلا المخلوقين تسمى:", options: ["تطفلاً", "تبادل منفعة (تقايض)", "تعايشاً", "افتراساً"], correct: 1 },
+  { id: 5, q: "العلاقة بين السمكة المهرجة وشقائق النعمان هي مثال على:", options: ["التطفل", "الافتراس", "تبادل المنفعة", "التنافس"], correct: 2 },
+  { id: 6, q: "أي مما يلي يمثل مكوناً غير حي في النظام البيئي؟", options: ["الأشجار", "البكتيريا", "التربة والماء", "الأرانب"], correct: 2 },
+  { id: 7, q: "عندما يتنافس ذئبان على صيد أرنب واحد، فإن هذه العلاقة تسمى:", options: ["تعايشاً", "تنافساً", "تطفلاً", "تكافلاً"], correct: 1 },
+  { id: 8, q: "المخلوق الحي الذي يعيش على مخلوق آخر ويسبب له الضرر يسمى:", options: ["مفترساً", "عائلاً", "طفيلياً", "منتجاً"], correct: 2 },
+  { id: 9, q: "أي مما يلي يصف دور 'المحللات' في النظام البيئي؟", options: ["صنع الغذاء من الشمس", "صيد الحيوانات الضعيفة", "تحليل المواد العضوية الميتة وإعادة المغذيات للتربة", "أكل الأعشاب فقط"], correct: 2 },
+  { id: 10, q: "أقصى عدد من أفراد الجماعة الحيوية يمكن للنظام البيئي دعمه يسمى:", options: ["المجتمع الحيوي", "السعة التحميلية", "العوامل المحددة", "الموطن"], correct: 1 },
+  { id: 11, q: "أي من هذه العوامل يعتبر عاملاً محدداً لنمو الجماعات في الغابة؟", options: ["كمية الماء والغذاء", "لون الأزهار", "شكل الصخور", "سرعة الرياح فقط"], correct: 0 },
+  { id: 12, q: "العلاقة بين القراد والكلب هي علاقة:", options: ["تعايش", "تطفل", "تبادل منفعة", "افتراس"], correct: 1 },
+  { id: 13, q: "عندما تستفيد الطيور من بناء أعشاشها على الأشجار دون أن تتأثر الشجرة، تسمى العلاقة:", options: ["تعايشاً", "تطفلاً", "تقايضاً", "تنافساً"], correct: 0 },
+  { id: 14, q: "ماذا يحدث للجماعة الحيوية إذا زاد عدد المفترسات بشكل كبير؟", options: ["يزداد عدد الفرائس", "يقل عدد الفرائس", "يبقى العدد ثابتاً", "تختفي المفترسات"], correct: 1 },
+  { id: 15, q: "الدور الخاص الذي يؤديه المخلوق الحي في موطنه يسمى:", options: ["الموطن", "الإطار البيئي", "السعة التحميلية", "الجماعة"], correct: 1 },
+  { id: 16, q: "أي مما يلي يمثل جماعة حيوية؟", options: ["جميع الأسماك والماء في بحيرة", "جميع الغزلان في غابة معينة", "التربة والصخور والأعشاب", "الشمس والهواء"], correct: 1 },
+  { id: 17, q: "المجتمع الحيوي يتكون من:", options: ["نوع واحد فقط", "مكونات غير حية فقط", "عدة جماعات حيوية مختلفة تتفاعل معاً", "الماء والهواء فقط"], correct: 2 },
+  { id: 18, q: "ماذا يسمى المخلوق الذي يصطاد مخلوقاً آخر ليأكله؟", options: ["الفريسة", "المفترس", "المحلل", "المنتج"], correct: 1 },
+  { id: 19, q: "العلاقة بين النحلة والزهرة حيث تأخذ النحلة الرحيق وتنقل اللقاح هي:", options: ["تعايش", "تقايض (تبادل منفعة)", "تطفل", "تنافس"], correct: 1 },
+  { id: 20, q: "أي من العوامل التالية حيوية في النظام البيئي؟", options: ["درجة الحرارة", "ضوء الشمس", "النباتات", "كمية الأمطار"], correct: 2 },
+  { id: 1, q: "أي مما يلي يصف النظام البيئي؟", options: ["مجموعة من الحيوانات فقط", "تفاعل بين المكونات الحية والمكونات غير الحية", "دراسة أحوال الطقس", "مكان تعيش فيه النباتات فقط"], correct: 1 },
+  { id: 2, q: "ماذا يسمى المورد الذي يحد من نمو الجماعات الحيوية؟", options: ["العامل المكتسب", "العامل المحدد", "الناتج البيئي", "المورد المفتوح"], correct: 1 },
+  { id: 3, q: "إذا حدث جفاف شديد في منطقة عشبية، أي الموارد سيكون العامل المحدد للأرانب؟", options: ["ضوء الشمس", "الماء والمساحة", "الأكسجين", "ثاني أكسيد الكربون"], correct: 1 },
+  { id: 4, q: "من الأمثلة على المكونات غير الحية في الغابة:", options: ["الأشجار والفطريات", "الحشرات والطيور", "الصخور والتربة والماء", "الأفاعي والسحالي"], correct: 2 },
+  { id: 5, q: "ماذا يحدث عندما تتجاوز الجماعة الحيوية (السعة التحميلية) للنظام البيئي؟", options: ["تزداد الموارد", "تبدأ أعداد الجماعة في الانخفاض بسبب نقص الموارد", "ينمو المجتمع أسرع", "تتوقف المفترسات عن الصيد"], correct: 1 },
+  { id: 6, q: "الغابة، المحيط، والبركة هي أمثلة على:", options: ["مجتمعات حيوية", "أنظمة بيئية", "مناطق مناخية فقط", "مواطن صغيرة"], correct: 1 },
+  { id: 7, q: "أي الموارد التالية يعتبر غير متجدد في النظام البيئي؟", options: ["ضوء الشمس", "الرياح", "الوقود الأحفوري", "الماء"], correct: 2 },
+  { id: 8, q: "تنافس الحيوانات على الغذاء يزداد عندما:", options: ["تكثر الموارد", "تقل الموارد وتزداد الجماعة", "تهاجر المفترسات", "يكون الجو معتدلاً"], correct: 1 },
+  { id: 9, q: "ما هي الوظيفة الأساسية للمنتجات في النظام البيئي؟", options: ["تحليل الجثث", "تحويل طاقة الشمس إلى غذاء", "أكل المستهلكات", "توفير الظل فقط"], correct: 1 },
+  { id: 10, q: "أي مما يلي يعتبر حلاً للمحافظة على استقرار النظام البيئي؟", options: ["الصيد الجائر", "إزالة الغابات", "إنشاء المحميات الطبيعية", "تلويث المياه"], correct: 2 },
+  { id: 11, q: "ما العضو الحيوي الذي يوفر الأكسجين في النظام البيئي؟", options: ["الحيوانات", "الفطريات", "النباتات", "الصخور"], correct: 2 },
+  { id: 12, q: "المناخ (درجة الحرارة وهطول الأمطار) يعتبر من العوامل:", options: ["الحيوية", "اللاحيوية", "الاجتماعية", "الوراثية"], correct: 1 },
+  { id: 13, q: "عندما تتوفر الموارد بكثرة، فإن الجماعات الحيوية عادة:", options: ["تنمو وتزداد", "تنقرض", "تهاجر", "يقل عددها"], correct: 0 },
+  { id: 14, q: "تُسمى دراسة العلاقات بين المخلوقات الحية وبيئتها:", options: ["علم الأحياء", "علم البيئة", "علم الأرض", "علم الكيمياء"], correct: 1 },
+  { id: 15, q: "أي مما يلي يقلل من السعة التحميلية لنظام بيئي مائي؟", options: ["زيادة الأكسجين", "التلوث الكيميائي", "كثرة النباتات المائية", "اعتدال الحرارة"], correct: 1 },
+  { id: 16, q: "العلاقة بين ضوء الشمس ونمو النبات تمثل تفاعلاً بين:", options: ["مكون حي ومكون حي", "مكون غير حي ومكون حي", "مكون غير حي ومكون غير حي", "لا يوجد تفاعل"], correct: 1 },
+  { id: 17, q: "أي بيئة مما يلي تتميز بقلة الموارد المائية ونباتات شوكية؟", options: ["الغابة المطيرة", "الصحراء", "التندرا", "الأراضي العشبية"], correct: 1 },
+  { id: 18, q: "تؤدي الزيادة المفاجئة في عدد المستهلكات إلى:", options: ["زيادة المنتجات", "استنزاف الموارد", "تحسن النظام البيئي", "زيادة الأمطار"], correct: 1 },
+  { id: 19, q: "ماذا يسمى التغير المنظم والمتكرر في النظام البيئي بمرور الزمن؟", options: ["التكيف", "التعاقب البيئي", "التطور", "الانقراض"], correct: 1 },
+  { id: 20, q: "أي السلوكيات التالية يساعد في حماية موارد الأرض؟", options: ["الإسراف في استهلاك الماء", "إعادة التدوير", "حرق النفايات", "استخدام المبيدات بكثرة"], correct: 1 },
+  { id: 1, q: "المصدر الرئيسي للطاقة في معظم السلاسل الغذائية هو:", options: ["التربة", "الشمس", "الماء", "القمر"], correct: 1 },
+  { id: 2, q: "تسمى العملية التي يصنع بها النبات غذاءه:", options: ["التنفس", "الهضم", "البناء الضوئي", "النتح"], correct: 2 },
+  { id: 3, q: "في السلسلة الغذائية (أعشاب -> جراد -> طيور)، يعتبر الجراد:", options: ["منتجاً", "مستهلكاً أولاً", "محللاً", "مفترساً نهائياً"], correct: 1 },
+  { id: 4, q: "تتداخل السلاسل الغذائية مع بعضها لتشكل ما يسمى:", options: ["هرم الطاقة", "دورة الماء", "الشبكة الغذائية", "المجتمع الحيوي"], correct: 2 },
+  { id: 5, q: "ما هي الكائنات التي تعيد تدوير المواد المغذية إلى التربة؟", options: ["المنتجات", "المحللات", "المفترسات", "آكلات الأعشاب"], correct: 1 },
+  { id: 6, q: "يوضح هرم الطاقة أن كمية الطاقة المتوفرة كلما انتقلنا للأعلى:", options: ["تزداد", "تبقى كما هي", "تناقص", "تتضاعف"], correct: 2 },
+  { id: 7, q: "المخلوق الحي الذي يتغذى على المنتجات والمستهلكات يسمى:", options: ["آكل أعشاب", "آكل لحوم", "قارت (مزدوج التغذية)", "محلل"], correct: 2 },
+  { id: 8, q: "أي الغازات يطلقه النبات كناتج لعملية البناء الضوئي؟", options: ["ثاني أكسيد الكربون", "النيتروجين", "الأكسجين", "الهيدروجين"], correct: 2 },
+  { id: 9, q: "التمثيل الصحيح لانتقال الطاقة هو:", options: ["منتج -> مستهلك -> محلل", "محلل -> منتج -> مستهلك", "مستهلك -> منتج -> محلل", "منتج -> محلل -> مستهلك"], correct: 0 },
+  { id: 10, q: "في دورة الكربون، تحصل الحيوانات على الكربون من خلال:", options: ["التنفس", "شرب الماء", "أكل النباتات", "ضوء الشمس"], correct: 2 },
+  { id: 11, q: "ماذا تسمى العملية التي يتحول فيها الماء من سائل إلى غاز في دورة الماء؟", options: ["التكثف", "التبخر", "الهطول", "الجريان السطحي"], correct: 1 },
+  { id: 12, q: "تسمى الكائنات التي تصطاد وتأكل بقايا الحيوانات الميتة (مثل النسر):", options: ["منتجات", "حيوانات كانسة", "محللات", "طفيليات"], correct: 1 },
+  { id: 13, q: "أي جزء في النبات يمتص الماء والأملاح من التربة؟", options: ["الأوراق", "الأزهار", "الجذور", "الساق"], correct: 2 },
+  { id: 14, q: "ما المادة التي يمتصها النبات من الهواء للقيام بالبناء الضوئي؟", options: ["الأكسجين", "ثاني أكسيد الكربون", "النيتروجين", "بخار الماء"], correct: 1 },
+  { id: 15, q: "أي مما يلي يمثل 'دورة المادة'؟", options: ["انتقال الطاقة من الشمس للأرض", "إعادة استخدام النيتروجين والكربون في البيئة", "نمو النبات من البذرة", "هجرة الطيور"], correct: 1 },
+  { id: 16, q: "السكر الذي ينتجه النبات في عملية البناء الضوئي يسمى:", options: ["البروتين", "الجلوكوز", "الدهون", "الأملاح"], correct: 1 },
+  { id: 17, q: "تعتمد دورة النيتروجين بشكل أساسي في تثبيته في التربة على:", options: ["البرق والبكتيريا", "الحيوانات الكبيرة", "ضوء الشمس", "الأمطار الحمضية"], correct: 0 },
+  { id: 18, q: "أين توجد أكبر كمية من الطاقة في هرم الطاقة؟", options: ["عند القمة", "في المنتصف", "عند القاعدة (المنتجات)", "عند المحللات"], correct: 2 },
+  { id: 19, q: "تسمى الكائنات التي لا تستطيع صنع غذائها بنفسها:", options: ["المنتجات", "المستهلكات", "ذاتية التغذية", "الجمادات"], correct: 1 },
+  { id: 20, q: "ماذا يحدث للمادة في النظام البيئي؟", options: ["تفنى تماماً", "تُخلق من العدم", "تُدور وتُستخدم مراراً", "تتحول لضوء فقط"], correct: 2 },
+  { id: 1, q: "ماذا يسمى التركيب أو السلوك الذي يساعد المخلوق على البقاء في بيئته؟", options: ["النمو", "التكيف", "التكاثر", "التنفس"], correct: 1 },
+  { id: 2, q: "تعتبر الزعانف في الأسماك مثالاً على التكيف:", options: ["السلوكي", "التركيبي", "الوظيفي", "المكتسب"], correct: 1 },
+  { id: 3, q: "هجرة الطيور في فصل الشتاء هي نوع من التكيف:", options: ["التركيبي", "الجسمي", "السلوكي", "الدائم"], correct: 2 },
+  { id: 4, q: "أي التكيفات التالية تساعد الجمل على العيش في الصحراء؟", options: ["الفرو الكثيف", "الخف العريض والمنخران القابلان للانغلاق", "الخياشيم", "الجلد الرقيق"], correct: 1 },
+  { id: 5, q: "ماذا يحدث للمخلوقات التي لا تستطيع التكيف مع التغيرات البيئية المفاجئة؟", options: ["تزدهر", "تنتقل أو تموت (قد تنقرض)", "تغير لونها فوراً", "تتوقف عن الأكل"], correct: 1 },
+  { id: 6, q: "تلوين بعض الحيوانات (مثل الحرباء) لمحاكاة البيئة يسمى:", options: ["التمويه", "التخفي", "المحاكاة", "جميع ما سبق صحيح"], correct: 3 },
+  { id: 7, q: "الأشجار التي تفقد أوراقها في الشتاء تتكيف من أجل:", options: ["جذب الطيور", "منع فقدان الماء وتوفير الطاقة", "زيادة البناء الضوئي", "الحصول على الأكسجين"], correct: 1 },
+  { id: 8, q: "أي مما يلي يعتبر تغيراً طبيعياً في البيئة؟", options: ["بناء المدن", "البراكين والفيضانات", "قطع الأشجار", "إلقاء النفايات"], correct: 1 },
+  { id: 9, q: "الدب القطبي لديه طبقة سميكة من الدهون تحت جلده لـ:", options: ["السباحة أسرع", "العزل الحراري والحماية من البرد", "تخزين الماء", "إخافة الأعداء"], correct: 1 },
+  { id: 10, q: "يسمى نوم بعض الحيوانات لفترات طويلة في الشتاء بـ:", options: ["البيات الشتوي", "الخمول الصيفي", "التنفس الهوائي", "الراحة السلبية"], correct: 0 },
+  { id: 11, q: "أي التكيفات تساعد النباتات المائية على الطفو؟", options: ["الجذور العميقة", "وجود فراغات هوائية في أوراقها وسيقانها", "الأوراق الإبرية", "الأزهار الكبيرة"], correct: 1 },
+  { id: 12, q: "عندما يشبه مخلوق حي غير سام مخلوقاً آخر ساماً لإخافة الأعداء، يسمى ذلك:", options: ["تمويهاً", "محاكاة", "تطفلاً", "تكافلاً"], correct: 1 },
+  { id: 13, q: "نشاط البومة في الليل للصيد يعتبر تكيفاً:", options: ["تركيبياً", "سلوكياً", "كيميائياً", "وراثياً"], correct: 1 },
+  { id: 14, q: "تغير البيئة الذي يؤدي إلى اختفاء نوع تماماً من الأرض يسمى:", options: ["تعاقباً", "انقراضاً", "تلوثاً", "تطوراً"], correct: 1 },
+  { id: 15, q: "الجذور الهوائية في نباتات المانجروف تساعدها على:", options: ["امتصاص السكر", "الحصول على الأكسجين في التربة المغمورة", "تثبيت الثمار", "طرد الأملاح فقط"], correct: 1 },
+  { id: 16, q: "تعتبر الأشواك في الصبار تكيفاً لحمايته من:", options: ["البرد", "الحيوانات الآكلة للأعشاب وفقدان الماء", "الرياح", "الأمطار"], correct: 1 },
+  { id: 17, q: "أي البيئات التالية تتطلب تكيفاً كالفرو الأبيض الكثيف؟", options: ["الغابات الاستوائية", "المناطق القطبية", "الصحاري الحارة", "المحيطات"], correct: 1 },
+  { id: 18, q: "ماذا يسمى دخول أنواع جديدة (غريبة) إلى نظام بيئي وتأثيرها عليه؟", options: ["الأنواع المستوطنة", "الأنواع الدخيلة (الغازية)", "المحللات", "المنتجات"], correct: 1 },
+  { id: 20, q: "تعتبر الغدد الملحية في الطيور البحرية تكيفاً:", options: ["تركيبياً", "سلوكياً", "وظيفياً", "مؤقتاً"], correct: 2 },
+  { id: 1, q: "أي من الأنشطة البشرية التالية يسبب تلوث الهواء؟", options: ["زراعة الأشجار", "حرق الوقود الأحفوري في المصانع والسيارات", "استخدام الطاقة الشمسية", "إعادة التدوير"], correct: 1 },
+  { id: 2, q: "ما هي النتيجة المباشرة لإزالة الغابات؟", options: ["زيادة الأكسجين", "فقدان مواطن المخلوقات الحية وانجراف التربة", "تحسن المناخ", "وفرة الغذاء"], correct: 1 },
+  { id: 3, q: "أي الممارسات التالية تساعد في حماية الحياة البحرية؟", options: ["إلقاء البلاستيك في البحر", "منع تسرب النفط وتجريم الصيد الجائر", "زيادة بناء المصانع الشاطئية", "صيد الأسماك الصغيرة"], correct: 1 },
+  { id: 4, q: "يسمى تلوث الماء والهواء والتربة بمواد ضارة بـ:", options: ["التنمية", "التلوث", "التعاقب", "الازدهار"], correct: 1 },
+  { id: 5, q: "ما هو أفضل حل لتقليل كمية النفايات في المدن؟", options: ["حرقها في العراء", "دفنها في الأودية", "التقليل وإعادة الاستخدام وإعادة التدوير", "رميها في البحر"], correct: 2 },
+  { id: 6, q: "الظاهرة التي تنتج عن زيادة غاز ثاني أكسيد الكربون وتؤدي لارتفاع حرارة الأرض هي:", options: ["الضباب", "الاحتباس الحراري", "الأمطار الحمضية", "الكسوف"], correct: 1 },
+  { id: 7, q: "تستخدم المحميات الطبيعية من أجل:", options: ["تربية الحيوانات الأليفة", "حماية الأنواع المهددة بالانقراض", "زراعة المحاصيل التجارية", "بناء الملاعب"], correct: 1 },
+  { id: 8, q: "كيف يؤثر استخدام المبيدات الحشرية بكثرة على النظام البيئي؟", options: ["يزيد من عدد الطيور", "قد يلوث المياه الجوفية ويقتل كائنات مفيدة", "ينقي الهواء", "يبرد التربة"], correct: 1 },
+  { id: 9, q: "أي مصادر الطاقة التالية يعتبر (صديقاً للبيئة)؟", options: ["الفحم", "النفط", "الطاقة الرياح", "الغاز الطبيعي"], correct: 2 },
+  { id: 10, q: "ماذا يسمى المطر الذي يتكون عندما تمتزج غازات المصانع مع بخار الماء؟", options: ["المطر النقي", "المطر الحمضي", "المطر الثلجي", "البرد"], correct: 1 },
+  { id: 11, q: "الصيد الجائر يؤدي إلى:", options: ["توازن النظام البيئي", "انقراض بعض الأنواع وخلل في الشبكة الغذائية", "زيادة الثروة السمكية", "تحسين السلالات"], correct: 1 },
+  { id: 12, q: "يمكن للفرد المساهمة في حماية البيئة من خلال:", options: ["ترك الأضواء مشعلة", "استخدام الأكياس البلاستيكية لمرة واحدة", "ترشيد استهلاك الماء والكهرباء", "رمي النفايات من نافذة السيارة"], correct: 2 },
+  { id: 13, q: "ما أثر بناء السدود على الأنهار؟", options: ["يزيد من سرعة الماء دائماً", "يغير مواطن الأسماك ويمنع وصول الطمي للأراضي", "يجفف البحر", "لا يؤثر بشيء"], correct: 1 },
+  { id: 14, q: "أي مما يلي يعتبر من 'الموارد المتجددة'؟", options: ["المعادن", "الطاقة الشمسية", "النفط", "الفحم"], correct: 1 },
+  { id: 15, q: "يُقصد بـ (إعادة التدوير):", options: ["رمي القديم وشراء الجديد", "تصنيع منتجات جديدة من مواد قديمة", "غسل الصحون", "زراعة الحديقة"], correct: 1 },
+  { id: 16, q: "ما هي الوظيفة الأساسية لطبقة الأوزون التي يحاول الإنسان حمايتها؟", options: ["توفير الأكسجين", "حماية الأرض من الأشعة فوق البنفسجية الضارة", "منع سقوط الشهب", "تبريد الأرض"], correct: 1 },
+  { id: 17, q: "تراكم النفايات البلاستيكية في المحيطات يضر بـ:", options: ["الأسماك والسلاحف والطيور البحرية", "السحب", "درجة ملوحة الماء فقط", "حركة الأمواج"], correct: 0 },
+  { id: 18, q: "يعتبر (التشجير) حلاً لمشكلة:", options: ["الضجيج فقط", "زحف الرمال (التصحر) وتلوث الهواء", "نقص المياه", "الزلازل"], correct: 1 },
+  { id: 19, q: "أي الغازات التالية يساهم في ثقب الأوزون؟", options: ["الأكسجين", "الكلوروفلوروكربون (CFCs)", "الهيدروجين", "النيتروجين"], correct: 1 },
+  { id: 20, q: "ما هو الهدف من التنمية المستدامة؟", options: ["استهلاك كل الموارد الآن", "تلبية احتياجات الحاضر دون الإضرار بحقوق الأجيال القادمة", "إيقاف التطور الصناعي", "العيش في الغابات فقط"], correct: 1 },
+  { id: 1, q: "انتقال الصفات من الآباء إلى الأبناء يسمى:", options: ["النمو", "الوراثة", "التكيف", "التعلم"], correct: 1 },
+  { id: 2, q: "أي مما يلي يعتبر صفة موروثة؟", options: ["مهارة القراءة", "لون العيون", "ركوب الدراجة", "تصفيف الشعر"], correct: 1 },
+  { id: 3, q: "الصفة التي تمنع صفة أخرى من الظهور تسمى:", options: ["صفة متنحية", "صفة سائدة", "صفة مكتسبة", "صفة ضعيفة"], correct: 1 },
+  { id: 4, q: "العالم الذي يعتبر مؤسس علم الوراثة هو:", options: ["نيوتن", "مندل", "باستير", "أديسون"], correct: 1 },
+  { id: 5, q: "توجد الجينات المحملة بالمعلومات الوراثية على:", options: ["الغشاء الخلوي", "الكروموسومات داخل النواة", "الميتوكندريا", "السيتوبلازم"], correct: 1 },
+  { id: 6, q: "الصفة المتنحية هي التي:", options: ["تظهر دائماً في الأبناء", "تختفي في وجود الصفة السائدة", "تظهر في كل الأجيال بنفس القوة", "لا تنتقل عبر الجينات"], correct: 1 },
+  { id: 7, q: "أي مما يلي يعتبر صفة مكتسبة (غير موروثة)؟", options: ["طول القامة", "شكل الأنف", "لعب كرة القدم باحتراف", "فصيلة الدم"], correct: 2 },
+  { id: 8, q: "يستخدم 'مربع بانيت' لـ:", options: ["قياس طول النبات", "توقع احتمالات ظهور الصفات الوراثية في الأبناء", "عد الكروموسومات", "رسم الخلية"], correct: 1 },
+  { id: 9, q: "كم عدد الكروموسومات في الخلية الجنسية للإنسان (الحيوان المنوي أو البويضة)؟", options: ["46 كروموسوم", "23 كروموسوم", "92 كروموسوم", "10 كروموسومات"], correct: 1 },
+  { id: 10, q: "السلوك الذي يولد مع الإنسان أو الحيوان ولا يحتاج لتعلم يسمى:", options: ["سلوكاً مكتسباً", "غريزة", "مهارة", "تفكيراً"], correct: 1 },
+  { id: 11, q: "عند تلقيح نبات بازلاء أرجواني الأزهار (سائد) مع أبيض (متنحي)، فإن الجيل الأول يكون:", options: ["كله أبيض", "كله أرجواني", "نصفه أبيض ونصفه أرجواني", "كله وردي"], correct: 1 },
+  { id: 12, q: "أي مما يلي يحدد جنس الجنين (ذكر أم أنثى)؟", options: ["الكروموسومات الجنسية", "نوع الغذاء", "درجة الحرارة", "عمر الأم"], correct: 0 },
+  { id: 13, q: "الجين هو جزء من مادة تسمى:", options: ["البروتين", "DNA", "الأملاح", "الماء"], correct: 1 },
+  { id: 14, q: "لماذا قد يختلف الإخوة في بعض الصفات رغم أنهم من نفس الأبوين؟", options: ["بسبب اختلاف الجينات التي ورثوها", "لأنهم يعيشون في غرف مختلفة", "بسبب اختلاف الطول فقط", "بسبب الملابس"], correct: 0 },
+  { id: 15, q: "صفة الغمازات في الوجه تعتبر صفة:", options: ["مكتسبة", "وراثية", "بيئية", "مؤقتة"], correct: 1 },
+  { id: 16, q: "أي مما يلي يمثل صفة متنحية في نبات البازلاء حسب تجارب مندل؟", options: ["الأزهار الأرجوانية", "البذور الملساء", "الأزهار البيضاء", "السيقان الطويلة"], correct: 2 },
+  { id: 17, q: "تأثير البيئة على الصفات الوراثية يظهر بوضوح في:", options: ["لون العين", "قوة العضلات وطول الجسم بناءً على التغذية", "فصيلة الدم", "عدد الأصابع"], correct: 1 },
+  { id: 18, q: "الغريزة هي مثال على:", options: ["الصفات المكتسبة", "السلوك الموروث", "التعلم السريع", "التكيف الكيميائي"], correct: 1 },
+  { id: 19, q: "ماذا يسمى الشخص الذي يدرس كيفية انتقال الصفات الوراثية؟", options: ["عالم جيولوجيا", "عالم وراثة", "عالم فلك", "عالم كيمياء"], correct: 1 },
+  { id: 20, q: "إذا كان كلا الأبوين يحملان صفة متنحية، فإن الأبناء:", options: ["سيظهرون الصفة السائدة حتماً", "ستظهر لديهم الصفة المتنحية", "لن يرثوا شيئاً", "سيكونون مختلفين تماماً"], correct: 1 }
+]
+        },
+        {
+            id: 2,
+            title: "مجال العلوم الفيزيائية",
+            outcomes: [
+                
+"ناتج التعلم (1-1-2-5-6): استكشاف الخصائص الفيزيائية للمادة، وتمييز التركيب الجزيئي لحالاتها، وتوضيح تغير حالات المادة بسبب الحرارة.",
+"ناتج التعلم (2-1-2-5-6): استيعاب التغيرات الكيميائية للمادة، وتوضيح المفاهيم المرتبطة بها، ومقارنة كتل المواد استناداً لقانون حفظ الكتلة.",
+"ناتج التعلم (3-1-2-5-6): مفهوم التفاعلات الكيميائية ومؤشرات حدوثها وأنواعها والعوامل المؤثرة في سرعة تفاعلها.",
+"ناتج التعلم (4-1-2-5-6): استكشاف الخصائص الكيميائية للمواد، والتمييز بين تفاعلات الأحماض والقواعد واستخداماتها.",
+
+"ناتج التعلم (1-2-2-5-6): وصف أثر القوة على الأجسام، والتمييز بين أنواع القوى.",
+
+"ناتج التعلم (2-2-2-5-6): استيعاب قوانين نيوتن الثلاثة، وتفسير حركة الأجسام في ضوئها.",
+
+"ناتج التعلم (3-2-2-5-6): تفسير العوامل المؤثرة في أنواع من القوى كقوة التجاذب والاحتكاك والمغناطيسية.",
+"ناتج التعلم (1-3-2-5-6): استيعاب مفهوم الطاقة والشغل، والتمييز بينهما، والتمثيل لهما من واقع الحياة.",
+"ناتج التعلم (2-3-2-5-6): استيعاب مبدأ حفظ الطاقة أثناء تحولاتها، وتطبيقه في الحياة اليومية.",
+
+"ناتج التعلم (1-4-2-5-6): وصف الموجات، والتمييز بين خصائصها نظرياً وبيانياً، والتنبؤ بحركتها.",
+
+"ناتج التعلم (2-4-2-5-6): استيعاب مفهوم انعكاس وانكسار الضوء، وانتقال الصوت وتفسير دورهما في التواصل.",
+
+"ناتج التعلم (1-5-2-5-6): استيعاب مفهوم الشحنة الكهربائية وشرح تنافر وتجاذب الأجسام والمقارنة بين دوائر التوالي والتوازي.",
+
+"ناتج التعلم (2-5-2-5-6): استيعاب خصائص المغناطيس واستخدامات المغانط في الحياة اليومية."
+        ],
+            questions:[
+  { id: 1, q: "ما هي الخاصية التي تصف كمية المادة في الجسم؟", options: ["الحجم", "الوزن", "الكتلة", "الكثافة"], correct: 2 },
+  { id: 2, q: "أي حالة من حالات المادة تكون جزيئاتها متراصة وتتحرك حركة اهتزازية في مكانها؟", options: ["السائلة", "الغازية", "الصلبة", "البلازما"], correct: 2 },
+  { id: 3, q: "درجة الحرارة التي تتحول عندها المادة من الحالة الصلبة إلى السائلة تسمى:", options: ["درجة الغليان", "درجة التجمد", "درجة الانصهار", "التكثف"], correct: 2 },
+  { id: 4, q: "ما الأداة المستخدمة لقياس حجم سائل بدقة؟", options: ["الميزان ذو الكفتين", "المسطرة", "المخبار المدرج", "الترمومتر"], correct: 2 },
+  { id: 5, q: "تحول المادة من الحالة الغازية إلى الحالة السائلة يسمى:", options: ["تبخراً", "تكثفاً", "تسامياً", "انصهاراً"], correct: 1 },
+  { id: 6, q: "أي من الخصائص التالية تعتبر خاصية فيزيائية؟", options: ["قابلية الاشتعال", "الصدأ", "الكثافة", "التفاعل مع الحمض"], correct: 2 },
+  { id: 7, q: "تعتمد خاصية الطفو للأجسام في الماء بشكل أساسي على:", options: ["اللون", "الطول", "الكثافة", "الملمس"], correct: 2 },
+  { id: 8, q: "ما هي وحدة قياس الكتلة في النظام الدولي؟", options: ["اللتر", "المتر", "الكيلوجرام", "النيوتن"], correct: 2 },
+  { id: 9, q: "أي الحالات التالية لها حجم ثابت وشكل غير ثابت؟", options: ["الخشب", "الأكسجين", "الماء", "الحديد"], correct: 2 },
+  { id: 10, q: "عند زيادة حرارة السائل، فإن سرعة حركة جزيئاته:", options: ["تقل", "تزداد", "تتوقف", "تبقى ثابتة"], correct: 1 },
+  { id: 11, q: "المادة التي لها شكل وحجم غير ثابتين هي:", options: ["الصلبة", "السائلة", "الغازية", "المعدنية"], correct: 2 },
+  { id: 12, q: "ماذا يحدث لجزيئات المادة عند التجميد؟", options: ["تتحرك أسرع", "تتقارب وتفقد طاقة", "تتباعد", "تزداد طاقتها"], correct: 1 },
+  { id: 13, q: "المقاومة التي يبديها السائل للانسياب تسمى:", options: ["الكثافة", "اللزوجة", "الضغط", "التوتر السطحي"], correct: 1 },
+  { id: 14, q: "أي المواد التالية تعتبر موصلاً جيداً للحرارة والكهرباء؟", options: ["الخشب", "النحاس", "البلاستيك", "الزجاج"], correct: 1 },
+  { id: 15, q: "تغير حالة المادة هو تغير:", options: ["كيميائي", "فيزيائي", "نووي", "حيوي"], correct: 1 },
+  { id: 16, q: "ما هو الحيز الذي يشغله الجسم؟", options: ["الكتلة", "الوزن", "الحجم", "المساحة"], correct: 2 },
+  { id: 17, q: "يسمى تحول المادة من الصلب إلى الغاز مباشرة دون المرور بالسائل:", options: ["التكثف", "التسامي", "الغليان", "الانصهار"], correct: 1 },
+  { id: 18, q: "عند وضع قطعة ثلج في الشمس، فإنها تكتسب طاقة حرارية تؤدي إلى:", options: ["تجمدها", "انصهارها", "تكثفها", "احتراقها"], correct: 1 },
+  { id: 19, q: "أي الأدوات تستخدم لقياس وزن الجسم؟", options: ["الميزان الرقمي", "الميزان النابضي", "المخبر المدرج", "المنقلة"], correct: 1 },
+  { id: 20, q: "الصدأ على مسمار حديد يعتبر تغيراً:", options: ["فيزيائياً", "كيميائياً", "حيوياً", "ميكانيكياً"], correct: 1 },
+  { id: 1, q: "أي مما يلي يعد مثالاً على تغير كيميائي؟", options: ["تقطيع الورق", "انصهار الجليد", "صدأ الحديد", "كسر الزجاج"], correct: 2 },
+  { id: 2, q: "التغير الذي ينتج عنه مواد جديدة تختلف في خصائصها عن المواد الأصلية هو:", options: ["تغير فيزيائي", "تغير كيميائي", "تغير شكلي", "تغير حالة المادة"], correct: 1 },
+  { id: 3, q: "ماذا ينص قانون حفظ الكتلة؟", options: ["الكتلة تزداد بعد التفاعل", "كتلة المواد المتفاعلة تساوي كتلة المواد الناتجة", "الكتلة تختفي أثناء التفاعل", "الكتلة تقل عند التسخين"], correct: 1 },
+  { id: 4, q: "أي مما يلي يعتبر من مؤشرات حدوث تفاعل كيميائي؟", options: ["تغير الشكل فقط", "تصاعد غاز أو تغير اللون", "ذوبان السكر في الماء", "تبخر الماء"], correct: 1 },
+  { id: 5, q: "عند حرق قطعة من الخشب، فإن الرماد الناتج يعتبر:", options: ["مادة أصلية", "مادة جديدة ناتجة عن تغير كيميائي", "تغيراً فيزيائياً", "مخلوطاً يمكن فصله"], correct: 1 },
+  { id: 6, q: "تفاعل الأكسجين مع الحديد في وجود الرطوبة يؤدي إلى تكون:", options: ["النحاس", "صدأ الحديد", "الملح", "السكر"], correct: 1 },
+  { id: 7, q: "في التفاعل الكيميائي، تسمى المواد التي توجد قبل البدء فيه بـ:", options: ["النواتج", "المواد المتفاعلة", "المحللات", "العوامل المساعدة"], correct: 1 },
+  { id: 8, q: "ماذا يحدث للذرات أثناء التغير الكيميائي؟", options: ["تتحطم وتختفي", "تنشأ ذرات جديدة من العدم", "تترتب بطريقة جديدة لتكوين مواد جديدة", "لا يحدث لها شيء"], correct: 2 },
+  { id: 9, q: "فقاعات الغاز التي تظهر عند وضع قرص فوار في الماء تدل على:", options: ["تغير فيزيائي", "انصهار", "تفاعل كيميائي", "تبخر بسيط"], correct: 2 },
+  { id: 10, q: "أي العمليات التالية تحافظ على نوع المادة ولا تغيرها؟", options: ["الاحتراق", "الصدأ", "التجمد", "الطبخ"], correct: 2 },
+  { id: 11, q: "كتلة قطعة من الحديد 10 جرام، إذا صدأت تماماً، فإن كتلة الصدأ تكون:", options: ["أقل من 10 جرام", "أكبر من 10 جرام (بسبب اتحادها مع الأكسجين)", "تساوي صفر", "تختفي تماماً"], correct: 1 },
+  { id: 12, q: "أي مما يلي يصف عملية (الاحتراق)؟", options: ["تفاعل المادة مع الأكسجين لإنتاج حرارة وضوء", "تحول السائل إلى غاز", "تفكك المادة بالبرودة", "تغير في الحجم فقط"], correct: 0 },
+  { id: 13, q: "ماذا يسمى التغير الذي يحدث عند خبز الكيك في الفرن؟", options: ["فيزيائي", "كيميائي", "حيوي", "ميكانيكي"], correct: 1 },
+  { id: 14, q: "عند خلط الخل مع صودا الخبز وتصاعد غاز، هذا دليل على:", options: ["انصهار", "تكون مادة جديدة", "تبخر الماء", "تجمد الخليط"], correct: 1 },
+  { id: 15, q: "المادة الناتجة عن اتحاد عنصرين أو أكثر اتحاداً كيميائياً تسمى:", options: ["مخلوطاً", "مركباً", "محلولاً", "ذرة"], correct: 1 },
+  { id: 16, q: "لماذا تكسى السفن بمواد تمنع الصدأ؟", options: ["لتغيير لونها", "لمنع التفاعل الكيميائي بين الحديد والماء والأكسجين", "لتكون أسرع في الماء", "لزيادة كتلتها"], correct: 1 },
+  { id: 17, q: "أي مما يلي لا يعتبر مادة جديدة؟", options: ["الرماد", "صدأ الحديد", "الماء المتجمد (الثلج)", "ثاني أكسيد الكربون الناتج عن الحرق"], correct: 2 },
+  { id: 18, q: "الضوء والحرارة المنبعثان عند إشعال شمعة هما دليل على:", options: ["تغير فيزيائي", "تفاعل كيميائي", "تسامي", "تكثف"], correct: 1 },
+  { id: 19, q: "ماذا يحدث لكتلة شمعة محترقة في وعاء مغلق؟", options: ["تقل", "تزداد", "تبقى ثابتة حسب قانون حفظ الكتلة", "تتلاشى"], correct: 2 },
+  { id: 20, q: "تغير لون الموز وترهله بمرور الوقت هو مثال على:", options: ["تغير فيزيائي", "تغير كيميائي", "تبخر", "تجمد"], correct: 1 },
+  
+  { id: 1, q: "ماذا نطلق على المواد التي تظهر بعد حدوث التفاعل الكيميائي؟", options: ["المتفاعلات", "النواتج", "الشوائب", "العناصر"], correct: 1 },
+  { id: 2, q: "أي العوامل التالية يزيد من سرعة التفاعل الكيميائي عادة؟", options: ["خفض درجة الحرارة", "زيادة درجة الحرارة", "تقليل كمية المواد", "وضع المواد في الظلام"], correct: 1 },
+  { id: 3, q: "المادة التي تزيد من سرعة التفاعل دون أن تستهلك فيه تسمى:", options: ["المادة الناتجة", "المادة المحفزة (المسرعة)", "المادة المتفاعلة", "المذيب"], correct: 1 },
+  { id: 4, q: "زيادة مساحة سطح المواد المتفاعلة (مثل استخدام مسحوق بدلاً من قطع) تؤدي إلى:", options: ["إبطاء التفاعل", "زيادة سرعة التفاعل", "توقف التفاعل", "عدم التأثير"], correct: 1 },
+  { id: 5, q: "تفاعل مادتين لإنتاج مادة واحدة جديدة يسمى تفاعل:", options: ["تحلل", "اتحاد (تكوين)", "إحلال", "احتراق"], correct: 1 },
+  { id: 6, q: "أي مما يلي يعتبر مؤشراً قوياً على حدوث تفاعل كيميائي؟", options: ["تغير حالة المادة من صلب لسائل", "تكون راسب (مادة صلبة في سائل)", "تغير الحجم فقط", "انقسام المادة لنصفين"], correct: 1 },
+  { id: 7, q: "لماذا نحفظ الطعام في الثلاجة؟", options: ["لتغيير طعمه", "لإبطاء التفاعلات الكيميائية التي تسبب فساد الطعام", "لزيادة كتلته", "ليصبح لونه أجمل"], correct: 1 },
+  { id: 8, q: "تفكك مادة واحدة إلى مادتين أو أكثر يسمى تفاعل:", options: ["اتحاد", "تحلل", "إحلال", "انصهار"], correct: 1 },
+  { id: 9, q: "ماذا يسمى التفاعل الذي يطلق طاقة حرارية؟", options: ["تفاعل ماص للحرارة", "تفاعل طارد للحرارة", "تفاعل فيزيائي", "تفاعل بارد"], correct: 1 },
+  { id: 10, q: "التفاعل الذي يحتاج لامتصاص طاقة حرارية لكي يحدث يسمى:", options: ["طارد للحرارة", "ماص للحرارة", "تفاعل سريع", "تفاعل احتراق"], correct: 1 },
+  { id: 11, q: "أي مما يلي يزيد من سرعة صدأ الحديد؟", options: ["دهان الحديد", "وجود الماء والأملاح", "تجفيف الحديد", "تغطية الحديد بالبلاستيك"], correct: 1 },
+  { id: 12, q: "ما هي الوظيفة الأساسية للإنزيمات في جسم الإنسان؟", options: ["إنتاج الفضلات", "تعمل كمحفزات حيوية لتسريع التفاعلات", "تخزين الدهون", "تغيير شكل الجسم"], correct: 1 },
+  { id: 13, q: "زيادة تركيز المواد المتفاعلة يؤدي غالباً إلى:", options: ["زيادة سرعة التفاعل", "نقص سرعة التفاعل", "توقف التفاعل", "تحوله لتغير فيزيائي"], correct: 0 },
+  { id: 14, q: "أي من هؤلاء يمثل تفاعل احتراق؟", options: ["تفاعل الخشب مع الأكسجين", "ذوبان الثلج", "غليان الماء", "كسر البيضة"], correct: 0 },
+  { id: 15, q: "تكون طبقة خضراء على النحاس بمرور الزمن هو دليل على:", options: ["تغير فيزيائي", "تفاعل كيميائي", "تلوث بسيط", "تبخر النحاس"], correct: 1 },
+  { id: 16, q: "المعادلة الكيميائية تعبر عن:", options: ["أوزان المواد فقط", "المتفاعلات والنواتج والظروف", "ألوان المواد", "حجم الوعاء"], correct: 1 },
+  { id: 17, q: "أي مما يلي يقلل من سرعة التفاعل الكيميائي؟", options: ["زيادة الضغط", "إضافة مادة مثبطة", "رفع الحرارة", "زيادة التركيز"], correct: 1 },
+  { id: 18, q: "احتراق شريط المغنيسيوم لإنتاج مسحوق أبيض وضوء ساطع هو تفاعل:", options: ["اتحاد", "تحلل", "فيزيائي", "تبخر"], correct: 0 },
+  { id: 19, q: "تغير طعم الحليب وأصبح حامضاً يدل على:", options: ["تغير فيزيائي", "تفاعل كيميائي", "تجمد الحليب", "خلط الحليب بالماء"], correct: 1 },
+  { id: 20, q: "عندما تترتب الذرات بشكل مختلف وتنشأ روابط جديدة، هذا يعني حدوث:", options: ["انصهار", "تبخر", "تفاعل كيميائي", "تكسير ميكانيكي"], correct: 2 },
+  
+  { id: 1, q: "المواد التي لها طعم لاذع وتحول ورقة تباع الشمس الزرقاء إلى حمراء هي:", options: ["القواعد", "الأحماض", "الأملاح", "السكريات"], correct: 1 },
+  { id: 2, q: "أي مما يلي يعتبر من خصائص القواعد؟", options: ["طعمها لاذع", "ملمسها صابوني وطعمها مر", "تحول تباع الشمس الأحمر للأزرق", "الخياران 2 و3 صحيحان"], correct: 3 },
+  { id: 3, q: "يستخدم مقياس الرقم الهيدروجيني (pH) لـ:", options: ["قياس طول المادة", "تحديد مدى حموضة أو قاعدية المحلول", "قياس درجة الحرارة", "قياس الكتلة"], correct: 1 },
+  { id: 4, q: "المحلول الذي قيمة pH له تساوي 7 يعتبر:", options: ["حمضياً قوياً", "قاعدياً", "متعادلاً (مثل الماء المقطر)", "حمضياً ضعيفاً"], correct: 2 },
+  { id: 5, q: "أي المواد التالية يعتبر حمضاً؟", options: ["الصابون", "الليمون", "منظف الزجاج", "مادة التبييض"], correct: 1 },
+  { id: 6, q: "ماذا ينتج عن تفاعل حمض مع قاعدة؟", options: ["حمض أقوى", "قاعدة أقوى", "ملح وماء", "غاز الأكسجين فقط"], correct: 2 },
+  { id: 7, q: "المواد التي يتغير لونها عند وجود حمض أو قاعدة تسمى:", options: ["المذيبات", "الكواشف", "الأملاح", "المحفزات"], correct: 1 },
+  { id: 8, q: "الأحماض القوية والقواعد القوية تتميز بأنها:", options: ["آمنة للمس", "حارقة ومسببة للتآكل", "صالحة للأكل", "لا تتفاعل مع الماء"], correct: 1 },
+  { id: 9, q: "أي قيمة pH تدل على أقوى حمض؟", options: ["pH 1", "pH 6", "pH 7", "pH 14"], correct: 0 },
+  { id: 10, q: "أي قيمة pH تدل على أقوى قاعدة؟", options: ["pH 0", "pH 7", "pH 8", "pH 14"], correct: 3 },
+  { id: 11, q: "تستخدم القواعد (مثل هيدروكسيد الصوديوم) في صناعة:", options: ["المشروبات الغازية", "المنظفات والصابون", "الخل", "العصائر"], correct: 1 },
+  { id: 12, q: "الحمض الموجود في معدة الإنسان ويساعد على الهضم هو:", options: ["حمض الستريك", "حمض الهيدروكلوريك", "حمض الخليك", "حمض الكبريتيك"], correct: 1 },
+  { id: 13, q: "تفاعل التعادل هو التفاعل الذي يحدث بين:", options: ["ملح وماء", "حمض وقاعدة", "فلز ولا فلز", "أكسجين وهيدروجين"], correct: 1 },
+  { id: 14, q: "عند وضع ورقة تباع شمس حمراء في محلول صابوني، فإن لونها يتحول إلى:", options: ["الأبيض", "الأزرق", "الأصفر", "يبقى أحمر"], correct: 1 },
+  { id: 15, q: "أي مما يلي يستخدم لتقليل حموضة التربة؟", options: ["إضافة الخل", "إضافة الجير (مادة قاعدية)", "إضافة الماء المالح", "إضافة عصير البرتقال"], correct: 1 },
+  { id: 16, q: "يُعرف الملح كيميائياً بأنه:", options: ["حمض قوي", "مادة ناتجة عن تفاعل حمض وقاعدة", "مادة طعمها مر دائماً", "نوع من أنواع السكر"], correct: 1 },
+  { id: 17, q: "الخل يعتبر مثالاً على:", options: ["قاعدة ضعيفة", "حمض ضعيف", "ملح طعام", "كاشف طبيعي"], correct: 1 },
+  { id: 18, q: "لماذا تستخدم الأحماض في بطاريات السيارات؟", options: ["لأنها توصل الكهرباء", "لأن طعمها حامض", "لأن لونها شفاف", "لأنها تجمد الماء"], correct: 0 },
+  { id: 19, q: "أي الكواشف التالية يمكن صنعه في المنزل؟", options: ["ورق تباع الشمس", "محلول الملفوف البنفسجي", "الفينولفثالين", "الميثيل البرتقالي"], correct: 1 },
+  { id: 20, q: "المادة التي تستخدم لعلاج حموضة المعدة الزائدة يجب أن تكون:", options: ["حمضية", "قاعدية (مضاد حموضة)", "مالحة جداً", "غازية"], correct: 1 },
+  
+  { id: 1, q: "أي مما يلي يعرّف (القوة) في الفيزياء؟", options: ["كتلة الجسم", "سحب أو دفع مؤثر في جسم ما", "سرعة الجسم في اتجاه معين", "المكان الذي يشغله الجسم"], correct: 1 },
+  { id: 2, q: "تسمى القوة التي تنشأ بين سطحين متلامسين وتعيق حركتهما:", options: ["قوة الجاذبية", "قوة الاحتكاك", "قوة مغناطيسية", "قوة شد"], correct: 1 },
+  { id: 3, q: "وحدة قياس القوة هي:", options: ["المتر", "الجرام", "النيوتن", "اللتر"], correct: 2 },
+  { id: 4, q: "عندما تؤثر قوى متزنة في جسم ساكن، فإن الجسم:", options: ["يتحرك بسرعة كبيرة", "يبقى ساكناً", "يغير اتجاهه", "ينفجر"], correct: 1 },
+  { id: 5, q: "القوة المسؤولة عن سقوط الأجسام نحو الأرض هي:", options: ["الاحتكاك", "الجاذبية", "المغناطيسية", "الكهرباء الساكنة"], correct: 1 },
+  { id: 6, q: "أي مما يلي يمثل قوى (تلامس)؟", options: ["الجاذبية", "الاحتكاك", "المغناطيسية", "الكهرباء الساكنة"], correct: 1 },
+  { id: 7, q: "ماذا يحدث للجسم عندما تؤثر فيه قوى غير متزنة؟", options: ["يبقى ساكناً", "يتسارع (تتغير سرعته أو اتجاهه)", "تزداد كتلته", "لا يتأثر"], correct: 1 },
+  { id: 8, q: "لكي يتحرك جسم ساكن، يجب أن تكون القوى المؤثرة فيه:", options: ["متزنة", "غير متزنة", "تساوي صفراً", "ضعيفة جداً"], correct: 1 },
+  { id: 9, q: "تعتمد قوة الجاذبية بين جسمين على:", options: ["اللون والشكل", "الكتلة والمسافة بينهما", "الحجم والحالة الفيزيائية", "السرعة والزمن"], correct: 1 },
+  { id: 10, q: "أي الأسطح التالية يكون احتكاك الأجسام معه أقل ما يمكن؟", options: ["الأسفلت", "الرمل", "الجليد", "العشب"], correct: 2 },
+  { id: 11, q: "القوة التي تعمل على سحب الأجسام لأسفل عند القفز هي:", options: ["الرفع", "الجاذبية", "الدفع", "الشد"], correct: 1 },
+  { id: 12, q: "تساعد الزيوت والشحوم في الآلات على:", options: ["زيادة الاحتكاك", "تقليل الاحتكاك", "زيادة الوزن", "تغيير اللون"], correct: 1 },
+  { id: 13, q: "إذا دفع ولدان صندوقاً في اتجاهين متعاكسين بنفس القوة، فإن القوة المحصلة تكون:", options: ["ضعف القوة", "صفراً", "في اتجاه الأقوى", "تساوي كتلتهما"], correct: 1 },
+  { id: 14, q: "قوة الشد هي القوة التي تنتقل عبر:", options: ["الهواء", "الحبال أو الأسلاك", "المغناطيس", "الماء"], correct: 1 },
+  { id: 15, q: "ما هي الأداة المستخدمة لقياس القوة؟", options: ["الميزان ذو الكفتين", "المخبار المدرج", "الميزان النابضي (الزنبركي)", "الترمومتر"], correct: 2 },
+  { id: 16, q: "عند رمي كرة للأعلى، فإنها تتوقف ثم تسقط بسبب تأثير:", options: ["قوة دفع الهواء", "قوة الجاذبية", "انعدام الوزن", "شكل الكرة"], correct: 1 },
+  { id: 17, q: "أي مما يلي يمثل قوى (تأثير عن بُعد)؟", options: ["الاحتكاك", "المغناطيسية", "الشد", "دفع العربة"], correct: 1 },
+  { id: 18, q: "كلما زادت كتلة الجسم، فإن قوة جاذبية الأرض له:", options: ["تقل", "تزداد", "تنعدم", "تبقى ثابتة"], correct: 1 },
+  { id: 19, q: "قوة الاحتكاك دائماً تؤثر في اتجاه:", options: ["نفس اتجاه الحركة", "معاكس لاتجاه الحركة", "عمودي على الحركة", "للأعلى دائماً"], correct: 1 },
+  { id: 20, q: "يسمى التغير في سرعة الجسم أو اتجاهه بمرور الزمن بـ:", options: ["المسافة", "الكتلة", "التسارع", "القصور الذاتي"], correct: 2 },
+
+  { id: 1, q: "ميل الجسم لمقاومة التغير في حالته الحركية يسمى:", options: ["الوزن", "القصور الذاتي", "التسارع", "السرعة"], correct: 1 },
+  { id: 2, q: "قانون نيوتن الأول ينص على أن الجسم الساكن يبقى ساكناً ما لم تؤثر فيه:", options: ["قوة غير متزنة", "قوة متزنة", "سرعة ثابتة", "حرارة عالية"], correct: 0 },
+  { id: 3, q: "حسب قانون نيوتن الثاني، إذا زادت القوة المؤثرة في جسم فإن تسارعه:", options: ["يقل", "يزداد", "لا يتأثر", "ينعدم"], correct: 1 },
+  { id: 4, q: "لكل فعل رد فعل مساوٍ له في المقدار ومعاكس له في الاتجاه. هذا هو قانون:", options: ["نيوتن الأول", "نيوتن الثاني", "نيوتن الثالث", "الجاذبية العام"], correct: 2 },
+  { id: 5, q: "لماذا يندفع الركاب للأمام عند توقف السيارة فجأة؟", options: ["بسبب الجاذبية", "بسبب القصور الذاتي", "بسبب قوة المحرك", "بسبب الاحتكاك"], correct: 1 },
+  { id: 6, q: "أي الصيغ التالية تمثل قانون نيوتن الثاني؟", options: ["القوة = الكتلة × التسارع", "السرعة = المسافة ÷ الزمن", "القوة = الكتلة ÷ الحجم", "التسارع = القوة + الكتلة"], correct: 0 },
+  { id: 7, q: "عند ركل كرة قدم، فإن الكرة تؤثر بقوة على قدمك. هذه القوة تسمى:", options: ["قوة فعل", "قوة رد فعل", "قوة متزنة", "قوة جاذبية"], correct: 1 },
+  { id: 8, q: "أي الأجسام التالية له قصور ذاتي أكبر؟", options: ["دراجة هوائية", "سيارة صغيرة", "شاحنة كبيرة", "كرة تنس"], correct: 2 },
+  { id: 9, q: "انطلاق الصاروخ للأعلى يعتمد بشكل أساسي على قانون:", options: ["نيوتن الأول", "نيوتن الثاني", "نيوتن الثالث", "الضغط"], correct: 2 },
+  { id: 10, q: "إذا أثرت نفس القوة على جسمين، أحدهما كتلته كبيرة والآخر كتلته صغيرة، فإن الجسم ذو الكتلة الكبيرة يكون تسارعه:", options: ["أكبر", "أصغر", "مساوياً للآخر", "صفراً"], correct: 1 },
+  { id: 11, q: "يُفسر قانون نيوتن الثالث حركة:", options: ["سيارة تسير بسرعة ثابتة", "السباح الذي يدفع الماء للخلف ليتحرك للأمام", "سقوط تفاحة من شجرة", "توقف كتاب على طاولة"], correct: 1 },
+  { id: 12, q: "العلاقة بين الكتلة والتسارع (عند ثبات القوة) هي علاقة:", options: ["طردية", "عكسية", "ثابتة", "لا توجد علاقة"], correct: 1 },
+  { id: 13, q: "ماذا يحدث لمسافة التوقف لسيارة سريعة عند الضغط على المكابح مقارنة بسيارة بطيئة؟", options: ["تكون أقل", "تكون أكبر بسبب القصور الذاتي", "متساوية", "تتوقف فوراً"], correct: 1 },
+  { id: 14, q: "عندما يمشي شخص على الأرض، فإن رد الفعل هو:", options: ["دفع الأرض لقدم الشخص للأمام", "دفع قدم الشخص للأرض", "وزن الشخص لأسفل", "الاحتكاك"], correct: 0 },
+  { id: 15, q: "أي القوانين يفسر بقاء الأقمار الصناعية في مداراتها؟", options: ["نيوتن الأول والجاذبية", "قانون الطفو", "قانون الانعكاس", "قانون أوم"], correct: 0 },
+  { id: 16, q: "وحدة قياس التسارع هي:", options: ["نيوتن", "متر/ثانية", "متر/ثانية تربيع", "كيلوجرام"], correct: 2 },
+  { id: 17, q: "من هو العالم الذي وضع قوانين الحركة الثلاثة؟", options: ["أديسون", "أينشتاين", "إسحاق نيوتن", "جاليليو"], correct: 2 },
+  { id: 18, q: "عندما تزداد كتلة الجسم، فإنه يحتاج إلى قوة ....... ليتسارع بنفس المقدار:", options: ["أقل", "أكبر", "مساوية", "لا يحتاج لقوة"], correct: 1 },
+  { id: 19, q: "قوة رد الفعل دائماً تكون ....... لقوة الفعل في المقدار:", options: ["أصغر", "أكبر", "مساوية", "ضعف"], correct: 2 },
+  { id: 20, q: "الجسم الذي يتحرك بسرعة ثابتة في خط مستقيم تكون القوة المحصلة المؤثرة فيه تساوي:", options: ["أقصى قيمة", "صفراً", "كتلته", "وزنه"], correct: 1 },
+
+  { id: 1, q: "ما الذي يحدث لقوة الجاذبية بين جسمين إذا زادت المسافة بينهما؟", options: ["تزداد", "تقل", "تبقى ثابتة", "تنعدم"], correct: 1 },
+  { id: 2, q: "المغناطيس يجذب الأجسام المصنوعة من:", options: ["الخشب", "النحاس", "الحديد والنيكل", "البلاستيك"], correct: 2 },
+  { id: 3, q: "تسمى المنطقة المحيطة بالمغناطيس وتظهر فيها آثار قوته بـ:", options: ["القطب الشمالي", "المجال المغناطيسي", "المركز", "المنطقة المتعادلة"], correct: 1 },
+  { id: 4, q: "الأقطاب المغناطيسية المتشابهة (شمالي مع شمالي):", options: ["تتجاذب", "تتنافر", "لا تتاثر", "تلتصق"], correct: 1 },
+  { id: 5, q: "أي العوامل التالية يزيد من قوة الاحتكاك؟", options: ["استخدام الزيوت", "جعل السطح أكثر خشونة", "تقليل وزن الجسم", "استخدام العجلات"], correct: 1 },
+  { id: 6, q: "أين تتركز قوة المغناطيس بأكبر قدر؟", options: ["في المنتصف", "عند القطبين", "في الداخل فقط", "على السطح العلوي فقط"], correct: 1 },
+  { id: 7, q: "الوزن هو قياس لقوة ....... الأرض للجسم:", options: ["دفع", "جذب", "احتكاك", "مقاومة"], correct: 1 },
+  { id: 8, q: "ماذا يحدث لوزن رائد الفضاء عند انتقاله من الأرض إلى القمر؟", options: ["يزداد", "يقل (لأن جاذبية القمر أقل)", "يبقى ثابتاً", "يصبح صفراً"], correct: 1 },
+  { id: 9, q: "أي مما يلي يقلل من مقاومة الهواء للأجسام المتحركة؟", options: ["زيادة مساحة السطح", "الشكل الانسيابي", "زيادة السرعة", "زيادة الخشونة"], correct: 1 },
+  { id: 10, q: "تستخدم المكابح (الفرامل) في السيارات لزيادة قوة:", options: ["الجاذبية", "الاحتكاك", "الدفع", "المغناطيسية"], correct: 1 },
+  { id: 11, q: "المغناطيس الكهربائي يفقد مغناطيسيته عند:", options: ["طرقه بالمطرقة", "فصل التيار الكهربائي عنه", "وضعه في الماء", "تبريده"], correct: 1 },
+  { id: 12, q: "الأرض تعمل كمغناطيس ضخم له قطبان:", options: ["شرقي وغربي", "شمالي وجنوبي", "علوي وسفلي", "يمين ويسار"], correct: 1 },
+  { id: 13, q: "لماذا يسهل تحريك جسم على عجلات مقارنة بسحبه على الأرض؟", options: ["لأن العجلات تزيد الجاذبية", "لأن الاحتكاك المتدحرج أقل من الاحتكاك الانزلاقي", "لأن العجلات تجذب الأرض", "لأن وزن الجسم يقل"], correct: 1 },
+  { id: 14, q: "قوة الجذب بين الشمس والكواكب تحافظ على:", options: ["احتراق الشمس", "بقاء الكواكب في مداراتها", "برودة الكواكب", "تغير الفصول فقط"], correct: 1 },
+  { id: 15, q: "أي أداة تستخدم لتحديد الاتجاهات باستخدام المجال المغناطيسي للأرض؟", options: ["الميزان", "البوصلة", "المنقلة", "الساعة"], correct: 1 },
+  { id: 16, q: "تعتمد قوة المغناطيس الكهربائي على:", options: ["عدد لفات السلك وقوة التيار", "لون السلك", "طول المسمار فقط", "نوع البطارية فقط"], correct: 0 },
+  { id: 17, q: "عند فرك اليدين معاً في الشتاء نشعر بالدفء بسبب تحول:", options: ["الجاذبية لحرارة", "الاحتكاك لحرارة", "المغناطيسية لبرودة", "الكهرباء لحرارة"], correct: 1 },
+  { id: 18, q: "ماذا يسمى القطب المغناطيسي الذي يشير إلى شمال الأرض؟", options: ["القطب الجنوبي", "القطب الشمالي", "القطب الموجب", "القطب السالب"], correct: 1 },
+  { id: 19, q: "تتأثر قوة الجاذبية بين جسمين بزيادة كتلتهما بحيث:", options: ["تقل الجاذبية", "تزداد الجاذبية", "تنعدم الجاذبية", "لا تتأثر الجاذبية"], correct: 1 },
+  { id: 20, q: "أي القوى التالية تمنعنا من الانزلاق أثناء المشي؟", options: ["الجاذبية", "الاحتكاك", "المغناطيسية", "الكهرباء الساكنة"], correct: 1 },
+
+  { id: 1, q: "ما هو المصدر الرئيسي للطاقة على الأرض؟", options: ["الرياح", "البطاريات", "الشمس", "الفحم"], correct: 2 },
+  { id: 2, q: "الطاقة الكامنة في الروابط بين ذرات المادة وجزيئاتها تسمى طاقة:", options: ["حركية", "كيميائية", "صوتية", "ضوئية"], correct: 1 },
+  { id: 3, q: "عندما يشتعل عود ثقاب، تتحول الطاقة الكيميائية إلى طاقة:", options: ["كهربائية", "حرارية وضوئية", "صوتية فقط", "مغناطيسية"], correct: 1 },
+  { id: 4, q: "تنتقل الحرارة في المواد الصلبة (مثل ملعقة معدنية) عن طريق:", options: ["التوصيل", "الحمل", "الإشعاع", "التبخر"], correct: 0 },
+  { id: 5, q: "أي مما يلي يعتبر مثالاً على طاقة الحركة؟", options: ["صخرة مستقرة قمة جبل", "سيارة تسير على الطريق", "نابض مشدود", "بطارية جافة"], correct: 1 },
+  { id: 6, q: "المواد التي تسمح بمرور الحرارة والكهرباء من خلالها بسهولة تسمى:", options: ["مواد عازلة", "مواد موصلة", "مواد شفافة", "مواد معتمة"], correct: 1 },
+  { id: 7, q: "تنتقل حرارة الشمس إلينا عبر الفضاء عن طريق:", options: ["التوصيل", "الحمل", "الإشعاع", "الاحتكاك"], correct: 2 },
+  { id: 8, q: "ماذا يحدث لجزيئات المادة عند تسخينها؟", options: ["تتوقف عن الحركة", "تتحرك أسرع وتتباعد", "تتجمع وتصغر", "تختفي"], correct: 1 },
+  { id: 9, q: "أي الألوان التالية يمتص أكبر قدر من طاقة الشمس الحرارية؟", options: ["الأبيض", "الأصفر", "الأسود", "الأزرق الفاتح"], correct: 2 },
+  { id: 10, q: "الطاقة لا تفنى ولا تستحدث من العدم، بل تتحول من شكل لآخر. هذا قانون:", options: ["حفظ الكتلة", "حفظ الطاقة", "الجاذبية", "الانعكاس"], correct: 1 },
+  { id: 11, q: "تتحول الطاقة الكهربائية في المروحة إلى طاقة:", options: ["صوتية فقط", "حركية", "كيميائية", "ضوئية"], correct: 1 },
+  { id: 12, q: "يصدر الصوت نتيجة لـ ....... الأجسام:", options: ["سكون", "اهتزاز", "تسخين", "تجميد"], correct: 1 },
+  { id: 13, q: "ينتقل الصوت بشكل أسرع ما يمكن في المواد:", options: ["الغازية", "السائلة", "الصلبة", "الفراغ"], correct: 2 },
+  { id: 14, q: "المنطقة التي ترتفع فيها كثافة جزيئات الهواء في الموجة الصوتية تسمى:", options: ["تخلخل", "تضاغط", "قمة", "قاع"], correct: 1 },
+  { id: 15, q: "أي مما يلي يعتبر مادة عازلة للحرارة؟", options: ["النحاس", "الألومنيوم", "الخشب", "الحديد"], correct: 2 },
+  { id: 16, q: "انتقال الحرارة في السوائل والغازات (مثل غليان الماء) يتم عن طريق:", options: ["التوصيل", "الحمل", "الإشعاع", "الامتصاص"], correct: 1 },
+  { id: 17, q: "العدسة التي تعمل على تجميع الأشعة الضوئية هي العدسة:", options: ["المقعرة", "المحدبة", "المستوية", "الشفافة"], correct: 1 },
+  { id: 18, q: "ارتداد الضوء عن السطوح المصقولة (مثل المرآة) يسمى:", options: ["انكساراً", "انعكاساً", "تحللاً", "امتصاصاً"], correct: 1 },
+  { id: 19, q: "انحراف الضوء عن مساره عند انتقاله بين وسطين شفافين مختلفين يسمى:", options: ["انعكاساً", "انكساراً", "تشتتاً", "ظلاً"], correct: 1 },
+  { id: 20, q: "يتحلل الضوء الأبيض عند مروره عبر المنشور الزجاجي إلى ....... ألوان:", options: ["ثلاثة", "خمسة", "سبعة", "عشرة"], correct: 2 },
+
+  { id: 1, q: "المسار المغلق الذي تتدفق فيه الشحنات الكهربائية يسمى:", options: ["المجال المغناطيسي", "الدائرة الكهربائية", "المولد", "المحول"], correct: 1 },
+  { id: 2, q: "تتدفق الكهرباء في الدائرة فقط عندما تكون:", options: ["مفتوحة", "مغلقة", "طويلة", "بدون بطارية"], correct: 1 },
+  { id: 3, q: "الجهاز الذي يستخدم لفتح وإغلاق الدائرة الكهربائية هو:", options: ["البطارية", "المصباح", "المفتاح الكهربائي", "السلك"], correct: 2 },
+  { id: 4, q: "في دائرة التوالي، إذا احترق مصباح واحد فإن بقية المصابيح:", options: ["تزداد إضاءتها", "تنطفئ جميعاً", "تبقى مضاءة", "تنفجر"], correct: 1 },
+  { id: 5, q: "تُوصل المصابيح في المنازل عادة على طريقة:", options: ["التوالي", "التوازي", "التداخل", "التصادم"], correct: 1 },
+  { id: 6, q: "المادة التي تقاوم تدفق الشحنات الكهربائية تسمى:", options: ["الموصل", "المقاومة", "البطارية", "المولد"], correct: 1 },
+  { id: 7, q: "أي مما يلي يعتبر مصدر طاقة في الدائرة الكهربائية؟", options: ["المفتاح", "البطارية", "المصباح", "السلك النحاسي"], correct: 1 },
+  { id: 8, q: "تراكم الشحنات الكهربائية على سطح جسم ما يسمى بـ:", options: ["الكهرباء المتحركة", "الكهرباء الساكنة", "المغناطيسية", "التأريض"], correct: 1 },
+  { id: 9, q: "في دائرة التوازي، يوجد للشحنات الكهربائية:", options: ["مسار واحد فقط", "أكثر من مسار", "لا توجد مسارات", "مسار دائري فقط"], correct: 1 },
+  { id: 10, q: "ما وظيفة (المنصهر / الفوز) في الدوائر الكهربائية؟", options: ["زيادة الإضاءة", "حماية الدوائر من التيار العالي", "تخزين الشحنات", "تغيير الجهد"], correct: 1 },
+  { id: 11, q: "المواد التي لا تسمح بمرور الكهرباء من خلالها (مثل المطاط) تسمى:", options: ["موصلات", "عوازل", "أشباه موصلات", "أقطاب"], correct: 1 },
+  { id: 12, q: "الشحنات الكهربائية المتشابهة (موجب مع موجب):", options: ["تتجاذب", "تتنافر", "تتعادل", "تختفي"], correct: 1 },
+  { id: 13, q: "يسمى تدفق الشحنات الكهربائية في السلك بـ:", options: ["الجهد الكهربائي", "التيار الكهربائي", "المقاومة", "السكون"], correct: 1 },
+  { id: 14, q: "أي الأجزاء التالية يحول الطاقة الكهربائية إلى طاقة ضوئية؟", options: ["المحرك", "المصباح", "الجرس", "المكواة"], correct: 1 },
+  { id: 15, q: "الجهاز الذي يحول الطاقة الحركية إلى طاقة كهربائية هو:", options: ["المحرك الكهربائي", "المولد الكهربائي", "البطارية", "المصباح"], correct: 1 },
+  { id: 16, q: "تفريغ الكهرباء الساكنة بشكل مفاجئ وكبير في الطبيعة يسمى:", options: ["الرعد", "البرق", "المطر", "الرياح"], correct: 1 },
+  { id: 17, q: "عند دلك بالون بقطعة صوف، يكتسب البالون شحنات:", options: ["مغناطيسية", "ساكنة", "حركية", "كيميائية"], correct: 1 },
+  { id: 18, q: "وحدة قياس التيار الكهربائي هي:", options: ["الفولت", "الأمبير", "الأوم", "الوات"], correct: 1 },
+  { id: 19, q: "تُصنع أسلاك التوصيل عادة من النحاس لأنه:", options: ["رخيص جداً", "موصل جيد للكهرباء", "خفيف الوزن", "ملون"], correct: 1 },
+  { id: 20, q: "ماذا يحدث للمقاومة الكهربائية عند زيادة طول السلك؟", options: ["تقل", "تزداد", "تبقى ثابتة", "تنعدم"], correct: 1 },
+  
+  { 
+    id: 4, 
+    q: "رائد فضاء يحاول تحريك صخرة كبيرة في الفضاء (انعدام الجاذبية)، هل يحتاج لبذل قوة؟ ولماذا؟", 
+    options: ["لا يحتاج لأن الصخرة بلا وزن", "نعم، بسبب القصور الذاتي للصخرة (مقاومة الحركة)", "لا، لأن الأجسام تتحرك وحدها في الفضاء", "نعم، لأن الجاذبية تسحب الصخرة لأسفل"], 
+    correct: 1 
+  },
+  { 
+    id: 5, 
+    q: "عند وضع ملعقة خشبية وملعقة معدنية في ماء ساخن، لماذا نشعر بالحرارة في المعدنية أسرع؟", 
+    options: ["لأن الخشب يمتص الحرارة ويخفيها", "لأن المعدن موصل جيد والمسافات بين جزيئاته تسمح بنقل الطاقة", "لأن الملعقة المعدنية أثقل", "لأن الخشب مادة سائلة"], 
+    correct: 1 
+  },
+  { 
+    id: 6, 
+    q: "في دائرة كهربائية موصلة على التوالي، لماذا تنطفئ جميع المصابيح عند إزالة واحد منها؟", 
+    options: ["لأن الكهرباء تستهلك في المصباح الأول", "لأن المسار الوحيد للتيار قد انقطع", "لأن المصابيح الأخرى تخاف من الظلام", "لأن الجهد الكهربائي يزداد"], 
+    correct: 1 
+  }
+]
+        },
+        {
+            id: 3,
+            title: "مجال علم الأرض والفضاء",
+            outcomes: [
+                
+"ناتج التعلم (1-1-3-5-6): وصف التغير في شكل القمر الظاهري أثناء دورانه حول الأرض وتفسير حدوثها.",
+
+
+"ناتج التعلم (2-1-3-5-6): تفسير الظواهر المرتبطة بحركة الأرض والقمر والشمس والتغيرات الناتجة عنها.",
+
+
+"ناتج التعلم (3-1-3-5-6): استنتاج تأثير الجاذبية في حركة المجموعة الشمسية والمجرات والظواهر المرتبطة بها.",
+
+"ناتج التعلم (4-1-3-5-6): تحديد سمات النظام الشمسي، ومقارنة المجموعة الشمسية بالمجرة والكون.",
+
+
+"ناتج التعلم (1-2-3-5-6): وصف طبقات الغلاف الجوي وتحديد مكوناتها وخصائصها وتأثيراتها في البيئة.",
+
+
+"ناتج التعلم (2-2-3-5-6): استنتاج علاقة أغلفة الأرض ببعضها وتوقع التفاعلات والتأثيرات الجيولوجية الناتجة عنها.",
+
+
+"ناتج التعلم (3-2-3-5-6): وصف العوامل والعمليات التي أثرت على سطح الأرض وغيرت بعض معالمها.",
+
+
+"ناتج التعلم (4-2-3-5-6): وصف أنواع الصخور وعلاقتها بالمعادن وتمييز صفاتها واستعمالاتها.",
+
+"ناتج التعلم (5-2-3-5-6): تحديد أسباب حدوث الزلازل والبراكين وآثارها وتحديد المواقع الأكثر عرضة لها."
+            ],
+            questions: [
+  { id: 1, q: "المادة الطبيعية الصلبة التي تشكل صخور الأرض تسمى:", options: ["التربة", "المعدن", "الوقود", "الزجاج"], correct: 1 },
+  { id: 2, q: "تتشكل الصخور النارية نتيجة لـ:", options: ["تراكم الرسوبيات", "تبريد وتصلب الماجما أو اللابة", "الضغط والحرارة الشديدين", "تأثير الأمطار"], correct: 1 },
+  { id: 3, q: "أي نوع من الصخور يتكون من طبقات متراصة فوق بعضها البعض؟", options: ["الصخور النارية", "الصخور الرسوبية", "الصخور المتحولة", "الصخور البركانية"], correct: 1 },
+  { id: 4, q: "تتحول الصخور من نوع إلى آخر عبر زمن طويل فيما يعرف بـ:", options: ["دورة الماء", "دورة الصخور", "التعرية", "التجوية"], correct: 1 },
+  { id: 5, q: "الصخور التي تتغير نتيجة الحرارة والضغط الشديدين دون أن تنصهر هي:", options: ["الصخور الرسوبية", "الصخور المتحولة", "الصخور النارية", "الرماد"], correct: 1 },
+  { id: 6, q: "توجد الأحافير (بقايا المخلوقات الميتة) غالباً في الصخور:", options: ["النارية", "الرسوبية", "المتحولة", "البركانية"], correct: 1 },
+  { id: 7, q: "أي الخصائص التالية تستخدم للتمييز بين المعادن؟", options: ["القساوة واللون واللمعان", "الرائحة والطعم فقط", "الحجم والوزن فقط", "مكان الوجود"], correct: 0 },
+  { id: 8, q: "يُعد (الماس) أقسى المعادن لأنه:", options: ["يخدش جميع المعادن الأخرى", "لونه جميل", "يوجد في البراكين", "خفيف الوزن"], correct: 0 },
+  { id: 9, q: "الصخور النارية التي تتكون على سطح الأرض تسمى صخوراً نارية:", options: ["جوفية", "سطحية", "رسوبية", "متحولة"], correct: 1 },
+  { id: 10, q: "الجرانيت مثال شهير على الصخور:", options: ["الرسوبية", "النارية الجوفية", "المتحولة", "العضوية"], correct: 1 },
+  { id: 11, q: "تسمى المادة الصخرية المنصهرة الموجودة تحت سطح الأرض بـ:", options: ["اللابة", "الماجما", "الرسوبيات", "المعدن"], correct: 1 },
+  { id: 12, q: "الرخام هو نوع من أنواع الصخور:", options: ["النارية", "المتحولة", "الرسوبية", "الرملية"], correct: 1 },
+  { id: 13, q: "أي مما يلي يعتبر معدناً؟", options: ["الكوارتز", "الفحم", "الخشب", "الزجاج الصناعي"], correct: 0 },
+  { id: 14, q: "تتكون الصخور الرسوبية بفعل عمليات:", options: ["الانصهار والتبخر", "الترسيب والضغط (التصخر)", "الزلزال والبراكين", "البرودة الشديدة"], correct: 1 },
+  { id: 15, q: "يستخدم مقياس 'موهس' لقياس ....... المعادن:", options: ["لمعان", "قساوة", "كتلة", "لون"], correct: 1 },
+  { id: 16, q: "اللون الذي يتركه المعدن عند حكه بلوح من الخزف يسمى:", options: ["اللمعان", "المخدش", "الانفصام", "البلورة"], correct: 1 },
+  { id: 17, q: "ما هي الصخرة التي تنتج عن تحول الصخر الرملي؟", options: ["الكوارتزيت", "الرخام", "البازلت", "الطفل"], correct: 0 },
+  { id: 18, q: "أي العوامل التالية يساعد في تكوين الصخور الرسوبية؟", options: ["الرياح والمياه الجارية", "الضغط الجوي العالي", "البرق", "دوران الأرض"], correct: 0 },
+  { id: 19, q: "معظم صخور القشرة الأرضية هي صخور:", options: ["رسوبية ونارية ومتحولة", "خشبية", "معدنية سائلة", "ملحية فقط"], correct: 0 },
+  { id: 20, q: "تستخدم الصخور النارية مثل (البازلت) غالباً في:", options: ["صناعة الحلي", "رصف الطرق والبناء", "الكتابة", "الغذاء"], correct: 1 },
+  { id: 1, q: "عملية تفتت الصخور إلى أجزاء صغيرة دون تغير تركيبها الكيميائي تسمى:", options: ["تجوية كيميائية", "تجوية فيزيائية", "ترسيباً", "زلزالاً"], correct: 1 },
+  { id: 2, q: "تسمى عملية نقل الفتات الصخري من مكان إلى آخر بـ:", options: ["التجوية", "التعرية", "الترسيب", "التصخر"], correct: 1 },
+  { id: 3, q: "عندما تقل سرعة الرياح أو المياه وتبدأ في وضع الفتات الصخري في مكان جديد، تسمى العملية:", options: ["تجوية", "تعرية", "ترسيباً", "انصهاراً"], correct: 2 },
+  { id: 4, q: "نمو جذور الأشجار داخل شقوق الصخور يؤدي إلى حدوث:", options: ["تجوية فيزيائية", "تجوية كيميائية", "ترسيب", "تلوث"], correct: 0 },
+  { id: 5, q: "تفاعل الأكسجين مع معادن الصخر وتغير لونها (مثل الصدأ) هو مثال على:", options: ["تجوية فيزيائية", "تجوية كيميائية", "تعرية ريحية", "تراكم"], correct: 1 },
+  { id: 6, q: "ما هو العامل الرئيسي المسؤول عن تكوين 'الكثبان الرملية' في الصحراء؟", options: ["الأمطار", "الرياح", "الجاذبية", "البراكين"], correct: 1 },
+  { id: 7, q: "تتكون (الدلتا) عند مصبات الأنهار نتيجة لعملية:", options: ["التعرية", "التجوية", "الترسيب", "النحت"], correct: 2 },
+  { id: 8, q: "أي مما يلي يعتبر من عوامل التعرية؟", options: ["المياه الجارية والرياح والجاذبية", "ضوء القمر", "ثبات الحرارة", "نمو الحشائش"], correct: 0 },
+  { id: 9, q: "الأمطار الحمضية تسبب نوعاً من التجوية يسمى:", options: ["تجوية فيزيائية", "تجوية كيميائية", "تجوية ميكانيكية", "تجمد الماء"], correct: 1 },
+  { id: 10, q: "توسع الشقوق في الصخور نتيجة تجمد الماء داخلها يسمى:", options: ["فعل الصقيع", "الانصهار", "التبخر", "التعرية"], correct: 0 },
+  { id: 11, q: "الجاذبية الأرضية تسبب التعرية من خلال:", options: ["تحريك الصخور والتربة من أعلى الجبال لأسفل", "تبخير الماء", "تغيير لون الصخر", "تفتيت المعادن"], correct: 0 },
+  { id: 12, q: "ماذا يسمى الفتات الصخري والمواد العضوية التي تغطي سطح الأرض؟", options: ["الماجما", "التربة", "اللابة", "المعدن"], correct: 1 },
+  { id: 13, q: "تساعد الأشجار في تقليل عملية التعرية لأن جذورها تعمل على:", options: ["تفتيت التربة", "تثبيت التربة ومنع انجرافها", "امتصاص الهواء", "تغيير مسار الشمس"], correct: 1 },
+  { id: 14, q: "الكهوف الجيرية تتكون غالباً بفعل التجوية الكيميائية الناتجة عن:", options: ["الرياح القوية", "المياه الجوفية المحملة بالأحماض", "أشعة الشمس", "الزلازل"], correct: 1 },
+  { id: 15, q: "عملية 'النحت' التي تقوم بها الرياح المحملة بالرمال للصخور هي نوع من:", options: ["التعرية", "الترسيب", "النمو الوراثي", "التصخر"], correct: 0 },
+  { id: 16, q: "أي المناطق التالية تكون فيها التعرية المائية أكبر ما يمكن؟", options: ["الأراضي المستوية", "المنحدرات الجبلية الشديدة", "الصحاري الجافة", "الغابات الكثيفة"], correct: 1 },
+  { id: 17, q: "يحدث الترسيب عندما:", options: ["تزداد سرعة النهر", "تقل طاقة العامل الناقل (الريح أو الماء)", "يهب إعصار قوي", "ينفجر بركان"], correct: 1 },
+  { id: 18, q: "أي من هذه المظاهر ناتج عن الترسيب الريحي؟", options: ["الأودية العميقة", "الكثبان الرملية", "الكهوف", "قمم الجبال الحادة"], correct: 1 },
+  { id: 19, q: "تأثير الأمواج على الشواطئ الصخرية يعتبر مثالاً على:", options: ["تجوية وتعرية معاً", "ترسيب فقط", "تجوية كيميائية فقط", "بناء الأرض"], correct: 0 },
+  { id: 20, q: "الطبقة السطحية من التربة هي الأكثر غنى بـ:", options: ["الصخور الكبيرة", "الدبال والمواد العضوية", "المعادن الصلبة جداً", "الماء المالح"], correct: 1 },
+  { id: 1, q: "ما هو المركز الذي تدور حوله جميع كواكب المجموعة الشمسية؟", options: ["الأرض", "القمر", "الشمس", "المريخ"], correct: 2 },
+  { id: 2, q: "تحدث ظاهرة الليل والنهار نتيجة لـ:", options: ["دوران الأرض حول الشمس", "دوران الأرض حول محورها", "دوران القمر حول الأرض", "ميل محور الشمس"], correct: 1 },
+  { id: 3, q: "تستغرق الأرض لإكمال دورة واحدة حول الشمس:", options: ["24 ساعة", "شهر واحد", "سنة واحدة (365 يوم تقريباً)", "10 سنوات"], correct: 2 },
+  { id: 4, q: "تحدث الفصول الأربعة نتيجة لدوران الأرض حول الشمس و:", options: ["قربها من القمر", "ميل محور الأرض", "سرعة الرياح", "تغير شكل القمر"], correct: 1 },
+  { id: 5, q: "أكبر كواكب المجموعة الشمسية حجماً هو:", options: ["زحل", "المشتري", "الأرض", "نبتون"], correct: 1 },
+  { id: 6, q: "يسمى الكوكب الأحمر بـ:", options: ["الزهرة", "المريخ", "عطارد", "أورانوس"], correct: 1 },
+  { id: 7, q: "أي الكواكب التالية يعتبر أقرب الكواكب إلى الشمس؟", options: ["الأرض", "الزهرة", "عطارد", "المريخ"], correct: 2 },
+  { id: 8, q: "ظاهرة حجب ضوء الشمس عن جزء من الأرض عندما يقع القمر بين الأرض والشمس تسمى:", options: ["خسوف القمر", "كسوف الشمس", "المد والجزر", "الاعتدال الربيعي"], correct: 1 },
+  { id: 9, q: "يتغير شكل القمر الظاهري خلال الشهر، وتسمى هذه الأشكال:", options: ["كواكب القمر", "أطوار القمر", "نجوم القمر", "ألوان القمر"], correct: 1 },
+  { id: 10, q: "عندما يكون القمر واقعاً بين الأرض والشمس ولا نرى منه شيئاً، يسمى هذا الطور:", options: ["بدراً", "تربيعاً أولاً", "محاقاً", "هلالاً"], correct: 2 },
+  { id: 11, q: "القوة التي تبقي الكواكب في مداراتها حول الشمس هي:", options: ["المغناطيسية", "الجاذبية", "الاحتكاك", "دفع الرياح الشمسية"], correct: 1 },
+  { id: 12, q: "تحدث ظاهرة خسوف القمر عندما تقع ....... في المنتصف بين الشمس والقمر:", options: ["الأرض", "المريخ", "الزهرة", "الشهب"], correct: 0 },
+  { id: 13, q: "أي كوكب يمتاز بوجود حلقات ضخمة وواضحة تدور حوله؟", options: ["عطارد", "الأرض", "زحل", "المريخ"], correct: 2 },
+  { id: 14, q: "يسمى الجرم السماوي الذي يدور حول الكوكب بـ:", options: ["النجم", "القمر (التابع)", "المذنب", "السديم"], correct: 1 },
+  { id: 15, q: "المد والجزر في المحيطات يحدث بشكل أساسي بسبب جاذبية:", options: ["الشمس فقط", "القمر", "كوكب المشتري", "باطن الأرض"], correct: 1 },
+  { id: 16, q: "ما هو الكوكب الذي يسمى 'توأم الأرض' لتقاربهما في الحجم؟", options: ["المريخ", "الزهرة", "عطارد", "بلوتو"], correct: 1 },
+  { id: 17, q: "تسمى الأجرام الصخرية الصغيرة التي تدور حول الشمس (بين المريخ والمشتري):", options: ["المجرات", "الكويكبات", "الأقمار", "السحب"], correct: 1 },
+  { id: 18, q: "أي مما يلي يعتبر نجماً؟", options: ["الأرض", "القمر", "الشمس", "المريخ"], correct: 2 },
+  { id: 19, q: "السنة الكبيسة تأتي كل 4 سنوات ويكون عدد أيامها:", options: ["364 يوماً", "365 يوماً", "366 يوماً", "400 يوم"], correct: 2 },
+  { id: 20, q: "الوحدة المستخدمة لقياس المسافات الكبيرة جداً بين النجوم هي:", options: ["الكيلومتر", "الميل", "السنة الضوئية", "المتر المربع"], correct: 2 },
+  { id: 1, q: "يسمى الاهتزاز المفاجئ لصخور القشرة الأرضية بـ:", options: ["الإعصار", "الزلزال", "البركان", "التسونامي"], correct: 1 },
+  { id: 2, q: "نقطة انطلاق الزلزال تحت سطح الأرض تسمى:", options: ["المركز السطحي", "بؤرة الزلزال", "الصدع", "فوهة البركان"], correct: 1 },
+  { id: 3, q: "الجهاز المستخدم لقياس وتسجيل الموجات الزلزالية هو:", options: ["البارومتر", "السيزموجراف", "الميزان", "الترمومتر"], correct: 1 },
+  { id: 4, q: "فتحة في القشرة الأرضية تخرج منها الماجما والغازات تسمى:", options: ["الصدع", "البركان", "الكهف", "الجبل"], correct: 1 },
+  { id: 5, q: "تسمى الماجما عندما تصل إلى سطح الأرض وتفقد غازاتها بـ:", options: ["الرماد", "اللابة", "الصخر الزيتي", "البلورات"], correct: 1 },
+  { id: 6, q: "البراكين التي لا تزال تندلع حتى الآن تسمى براكين:", options: ["هامدة", "ساكنة", "نشطة", "ميتة"], correct: 2 },
+  { id: 7, q: "تسونامي هو عبارة عن أمواج محيطية ضخمة ناتجة عن زلزال في:", options: ["قاع المحيط", "قمم الجبال", "الصحراء", "الغلاف الجوي"], correct: 0 },
+  { id: 1, q: "أقل طبقات الأرض سمكاً وهي التي نعيش عليها تسمى:", options: ["الستار", "اللب", "القشرة الأرضية", "الغلاف الجوي"], correct: 2 },
+  { id: 2, q: "الطبقة التي تلي القشرة الأرضية وتتكون من صخور منصهرة جزئياً هي:", options: ["اللب الخارجي", "الستار (الوشاح)", "اللب الداخلي", "التربة"], correct: 1 },
+  { id: 3, q: "أحر طبقات الأرض وأكثرها ضغطاً هي:", options: ["القشرة", "الستار", "اللب", "الغلاف الصخري"], correct: 2 },
+  { id: 4, q: "يتكون اللب الداخلي للأرض من مواد في حالة:", options: ["سائلة", "غازية", "صلبة (بسبب الضغط)", "منصهرة"], correct: 2 },
+  { id: 1, q: "أي مما يلي يعتبر من موارد الطاقة غير المتجددة؟", options: ["الشمس", "الرياح", "النفط", "المياه"], correct: 2 },
+  { id: 2, q: "تسمى بقايا النباتات والحيوانات التي دفنت في باطن الأرض لملايين السنين:", options: ["المعادن", "الوقود الأحفوري", "الصخور النارية", "الدبال"], correct: 1 },
+  { id: 3, q: "أي الطرق التالية تساعد في تقليل تلوث التربة؟", options: ["استخدام المبيدات بكثرة", "الزراعة العضوية وتقليل النفايات", "حرق الغابات", "الزحف العمراني"], correct: 1 },
+  { id: 4, q: "المياه التي توجد في مسام الصخور تحت سطح الأرض تسمى:", options: ["مياهاً سطحية", "مياهاً جوفية", "محيطات", "أنهاراً"], correct: 1 },
+  { id: 1, q: "تجمع هائل من النجوم والغازات والغبار يسمى بـ:", options: ["الكوكب", "المجرة", "المذنب", "النيزك"], correct: 1 },
+  { id: 2, q: "مجرتنا التي ينتمي إليها نظامنا الشمسي تسمى:", options: ["أندروميدا", "درب التبانة", "السحابة الكبرى", "المجرة البيضاوية"], correct: 1 },
+  { id: 3, q: "المسافة التي يقطعها الضوء في سنة كاملة تسمى:", options: ["السنة الضوئية", "الميل الكوني", "الوحدة الفلكية", "السرعة القصوى"], correct: 0 },
+  { 
+    id: 7, 
+    q: "إذا وجد عالم أحافير صدفة لمخلوق بحري في قمة جبل شاهق، فماذا يستنتج عن تاريخ هذا الجبل؟", 
+    options: ["أن الطيور نقلت الصدفة هناك", "أن هذه المنطقة كانت قاع بحر قبل ملايين السنين وارتفعت بفعل القوى الأرضية", "أن الصدفة سقطت من السماء", "أن الجبل تكون من براكين حديثة"], 
+    correct: 1 
+  },
+  { 
+    id: 8, 
+    q: "لماذا نرى دائماً وجهاً واحداً فقط للقمر من الأرض؟", 
+    options: ["لأن القمر لا يدور حول نفسه", "لأن مدة دوران القمر حول نفسه تساوي مدة دورانه حول الأرض", "لأن الشمس تضيء جهة واحدة فقط", "بسبب سحب الأرض للقمر من جهة واحدة"], 
+    correct: 1 
+  },
+  { 
+    id: 9, 
+    q: "ماذا سيحدث للفصول الأربعة إذا أصبح محور الأرض مستقيماً (غير مائل) أثناء دورانها حول الشمس؟", 
+    options: ["ستتغير الفصول بسرعة أكبر", "ستختفي الفصول الأربعة ويصبح المناخ ثابتاً في كل منطقة", "سيصبح الصيف في كل مكان", "لن يكون هناك ليل"], 
+    correct: 1 
+  }
+]
+        }
+      ];
+
+    // حالة التطبيق
+    let currentChapterId = 1;   // الأول
+    let selectedOutcomeIndex = null; // ناتج التعلم المختار
+    let currentQuestionInOutcomeIndex = 0; // مؤشر السؤال الحالي
+    let wrongAttempts = {};     // تتبع المحاولات الخاطئة لكل سؤال
+    let answers = {};           // المفتاح: `${chapterId}_q${questionId}` القيمة: index الإجابة
+    let studentId = "طالب";     // تعريف افتراضي لتجنب خطأ المراجع
+    let chapterScores = {};
+
+    function applyLatexFormatting() {
+        const pMap = {'²':'2', '³':'3', '⁴':'4', '⁵':'5', '⁶':'6', '⁷':'7', '⁸':'8', '⁹':'9'};
+        const convert = (text) => {
+            if (typeof text !== 'string') return text;
+            return text
+                .replace(/([\d\u0660-\u0669]+)\/([\d\u0660-\u0669]+)/g, '\\(\\frac{$1}{$2}\\)')
+                .replace(/√\s*([-]?[\d\u0660-\u0669]+(\.[\d\u0660-\u0669]+)?)/g, '\\(\\sqrt{$1}\\)')
+                .replace(/³√\s*([-]?[\d\u0660-\u0669]+(\.[\d\u0660-\u0669]+)?)/g, '\\(\\sqrt[3]{$1}\\)')
+                .replace(/([a-zA-Z\u0621-\u064A\d\u0660-\u0669])([²³⁴⁵⁶⁷⁸⁹])/g, (m, p1, p2) => `\\(${p1}^{${pMap[p2]}}\\)`)
+                .replace(/([a-zA-Z\u0621-\u064A\d\u0660-\u0669])\^([\d\u0660-\u0669]+)/g, '\\($1^{$2}\\)')
+                .replace(/10⁻([³⁴⁵])/g, (m, p1) => `\\(10^{-${pMap[p1]}}\\)` )
+                .replace(/([\d\u0660-\u0669]+)⁻²/g, '\\($1^{-2}\\)')
+                .replace(/π/g, '\\(\\pi\\)')
+                .replace(/∠/g, '\\(\\angle\\) ')
+                .replace(/×/g, ' \\(\\times\\) ')
+                .replace(/÷/g, ' \\(\\div\\) ')
+                .replace(/±/g, ' \\(\\pm\\) ')
+                .replace(/≈/g, ' \\(\\approx\\) ')
+                .replace(/≠/g, ' \\(\\neq\\) ')
+                .replace(/≤/g, ' \\(\\le\\) ')
+                .replace(/≥/g, ' \\(\\ge\\) ')
+                .replace(/([\d\u0660-\u0669]+)\s*°/g, '\\($1^\\circ\\)');
+        };
+        chaptersData.forEach(ch => {
+            ch.questions.forEach(q => {
+                q.q = convert(q.q);
+                q.options = q.options.map(convert);
+            });
+        });
+    }
+
+    // دوال مساعدة
+
+    // توزيع الأسئلة على النتاجات تلقائياً بناءً على ترتيبها (لأغراض التفاعل)
+    function distributeQuestionsToOutcomes() {
+        chaptersData.forEach(ch => {
+            const qCount = ch.questions.length;
+            const oCount = ch.outcomes.length;
+            const perOutcome = Math.ceil(qCount / oCount);
+            ch.questions.forEach((q, idx) => {
+                q.outcomeIndex = Math.floor(idx / perOutcome);
+            });
+        });
+    }
+
+    function totalQuestionsCount() {
+        return chaptersData.reduce((sum, ch) => sum + ch.questions.length, 0);
+    }
+
+    function computeGlobalScore() {
+        let totalCorrect = 0;
+        for (let ch of chaptersData) {
+            for (let q of ch.questions) {
+                const key = `${ch.id}_q${q.id}`;
+                const userAnswer = answers[key];
+                if (userAnswer !== undefined && userAnswer === q.correct) {
+                    totalCorrect++;
+                }
+            }
+        }
+        return totalCorrect;
+    }
+
+    function updateGlobalBadge() {
+        const globalSpan = document.getElementById('globalScoreSpan');
+        const totalSpan = document.getElementById('totalQuestionsSpan');
+        updateAllOutcomesProgress(); 
+        if (globalSpan) globalSpan.innerText = computeGlobalScore();
+        if (totalSpan) totalSpan.innerText = totalQuestionsCount();
+    }
+
+    function updateAllOutcomesProgress() {
+        const chapter = chaptersData.find(ch => ch.id === currentChapterId);
+        const pList = document.getElementById('outcomesProgressList');
+        if (!pList || !chapter) return;
+        
+        pList.innerHTML = chapter.outcomes.map((out, idx) => {
+            const outcomeQuestions = chapter.questions.filter(q => q.outcomeIndex === idx);
+            const total = outcomeQuestions.length;
+            const answeredCount = outcomeQuestions.filter(q => answers[`${chapter.id}_q${q.id}`] !== undefined).length;
+            const percent = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
+            
+            return `
+                <div style="margin-bottom: 0.8rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.2rem; color: #64748b;">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;" title="${out}">${out}</span>
+                        <span style="font-weight: bold; color: ${percent === 100 ? '#10b981' : '#4338ca'}">${percent}%</span>
+                    </div>
+                    <div style="height: 4px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+                        <div style="width: ${percent}%; height: 100%; background: ${percent === 100 ? '#10b981' : '#6366f1'}; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // عرض الأسئلة للفصل الحالي
+    function renderCurrentChapter() {
+        const chapter = chaptersData.find(ch => ch.id === currentChapterId);
+        if (!chapter) return;
+
+        // تحديث العنوان والمخرجات
+        document.getElementById('chapterTitle').innerText = chapter.title;
+        
+        // بناء قائمة نتاجات التعلم في القائمة المنسدلة
+        const outcomesSelect = document.getElementById('outcomesSelect');
+        const defaultOption = `<option value="" disabled ${selectedOutcomeIndex === null ? 'selected' : ''}>اختر ناتج تعلم للبدء...</option>`;
+        outcomesSelect.innerHTML = defaultOption + chapter.outcomes.map((out, idx) => `
+            <option value="${idx}" ${selectedOutcomeIndex === idx ? 'selected' : ''}>
+                ${out}
+            </option>
+        `).join('');        
+
+        outcomesSelect.onchange = (e) => {
+            selectedOutcomeIndex = parseInt(e.target.value);
+            currentQuestionInOutcomeIndex = 0;
+            renderCurrentChapter();
+        };
+
+        const container = document.getElementById('questionsContainer');
+        const actionButtons = document.querySelector('.action-buttons');
+
+        // إذا لم يتم اختيار ناتج تعلم بعد
+        if (selectedOutcomeIndex === null) {
+            container.innerHTML = `<div style="text-align:center; padding: 3rem; color: #64748b;">
+                <i class="fas fa-hand-pointer" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                <h3>يرجى اختيار "ناتج تعلم" من الأعلى لعرض الأسئلة الخاصة به</h3>
+            </div>`;
+            actionButtons.style.display = 'none';
+            document.getElementById('progressIndicator').style.display = 'none';
+            return;
+        }
+
+        actionButtons.style.display = 'flex';
+        document.getElementById('progressIndicator').style.display = 'block';
+
+        // تصفية الأسئاه بناءً على الناتج المختار
+        const filteredQuestions = chapter.questions.filter(q => q.outcomeIndex === selectedOutcomeIndex);
+
+        const submitBtn = document.getElementById('submitAnswersBtn');
+        if (currentQuestionInOutcomeIndex === filteredQuestions.length - 1) {
+            submitBtn.style.display = 'inline-flex';
+        } else {
+            submitBtn.style.display = 'none';
+        }
+
+        const q = filteredQuestions[currentQuestionInOutcomeIndex];
+
+        let questionsHtml = '';
+        if (q) {
+            const key = `${chapter.id}_q${q.id}`;
+            const savedAnswer = answers[key];
+            const attempts = wrongAttempts[key] || 0;
+            let hintHtml = '';
+            
+            // إظهار التلميح إذا كانت المحاولات الخاطئة 3 أو أكثر
+            if (attempts >= 3) {
+                hintHtml = `
+                    <div style="margin-top: 10px; padding: 10px; background-color: #ecfdf5; border: 1px solid #10b981; border-radius: 12px; color: #065f46; font-weight: bold; font-size: 0.9rem;">
+                        <i class="fas fa-lightbulb"></i> مساعدة: الإجابة الصحيحة هي: <span style="color: #059669;">${q.options[q.correct]}</span>
+                    </div>`;
+            }
+
+            questionsHtml = `
+                <div class="question-item fade-in" data-qid="${q.id}" data-chapter="${chapter.id}">
+                    <div class="question-text">
+                        <span class="q-num">${currentQuestionInOutcomeIndex + 1}</span>
+                        <span>${q.q}</span>
+                    </div>
+                    <div class="options" id="options-${chapter.id}-${q.id}">
+                        ${q.options.map((opt, optIdx) => `
+                            <label class="option-label">
+                                <input type="radio" name="q${chapter.id}_${q.id}" value="${optIdx}" ${savedAnswer !== undefined && savedAnswer == optIdx ? 'checked' : ''}>
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="answer-feedback">${hintHtml}</div>
+                    
+                    <div class="navigation-controls" style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                        <button class="btn btn-secondary" id="prevQBtn" ${currentQuestionInOutcomeIndex === 0 ? 'disabled style="opacity:0.5; cursor:default;"' : ''}>
+                            <i class="fas fa-chevron-right"></i> السابق
+                        </button>
+                        <button class="btn btn-primary" id="nextQBtn" ${currentQuestionInOutcomeIndex === filteredQuestions.length - 1 ? 'disabled style="opacity:0.5; cursor:default;"' : ''}>
+                            التالي <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = q ? questionsHtml : '';
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([container]);
+        }
+
+        // إضافة مستمعات لتحديث الإجابات فوراً
+        if (q) {
+            const radios = container.querySelectorAll(`input[name="q${chapter.id}_${q.id}"]`);
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const selectedVal = parseInt(e.target.value);
+                    answers[`${chapter.id}_q${q.id}`] = selectedVal;
+                    // تحديث البادج العالمية
+                    updateGlobalBadge();
+                    // إزالة أي رسالة خطأ
+                    const parentDiv = document.getElementById(`options-${chapter.id}-${q.id}`).closest('.question-item');
+                    const feedbackDiv = parentDiv.querySelector('.answer-feedback');
+                    if (feedbackDiv) feedbackDiv.innerHTML = '';
+                    updateProgress();
+                });
+                
+            });
+
+            // مستمعات أزرار التنقل
+            container.querySelector('#prevQBtn').addEventListener('click', () => {
+                if (currentQuestionInOutcomeIndex > 0) {
+                    currentQuestionInOutcomeIndex--;
+                    renderCurrentChapter();
+                }
+            });
+            container.querySelector('#nextQBtn').addEventListener('click', () => {
+                if (currentQuestionInOutcomeIndex < filteredQuestions.length - 1) {
+                    currentQuestionInOutcomeIndex++;
+                    renderCurrentChapter();
+                }
+            });
+        }
+
+        // تحديث مؤشر التقدم في الفصل
+        updateProgress();
+
+        function updateProgress() {
+            const totalQ = filteredQuestions.length;
+        const answeredCount = filteredQuestions.filter(q => answers[`${chapter.id}_q${q.id}`] !== undefined).length;
+            document.getElementById('progressIndicator').innerHTML = `<i class="fas fa-list-ol"></i> سؤال ${currentQuestionInOutcomeIndex + 1} من ${totalQ} | <i class="fas fa-check-circle"></i> المكتمل: ${answeredCount}`;
+
+            // تحديث شريط التقدم المرئي
+            const progressPercent = totalQ > 0 ? (answeredCount / totalQ) * 100 : 0;
+            const barFill = document.getElementById('progressBarFill');
+            if (barFill) barFill.style.width = progressPercent + '%';
+        }
+
+        // إخفاء منطقة النتائج السابقة
+        const resultsDiv = document.getElementById('resultsArea');
+        if (resultsDiv) resultsDiv.innerHTML = '';
+    }
+
+    // حساب نتيجة الفصل الحالي وعرضها
+    function showChapterResults() {
+        const chapter = chaptersData.find(ch => ch.id === currentChapterId);
+        if (!chapter) return;
+        const filteredQuestions = chapter.questions.filter(q => q.outcomeIndex === selectedOutcomeIndex);
+        
+        let correct = 0;
+        let total = filteredQuestions.length;
+        let firstWrongIndex = -1;
+        let wrongCount = 0;
+
+        for (let i = 0; i < filteredQuestions.length; i++) {
+            const q = filteredQuestions[i];
+            const key = `${chapter.id}_q${q.id}`;
+            const ans = answers[key];
+            if (ans !== undefined && ans === q.correct) {
+                correct++;
+                // إذا كانت الإجابة صحيحة، يمكننا تصفير العداد أو تركه (العرض يعتمد على كون الإجابة مفقودة)
+            } else {
+                if (firstWrongIndex === -1) firstWrongIndex = i;
+                
+                // زيادة عداد المحاولات الخاطئة لهذا السؤال
+                wrongAttempts[key] = (wrongAttempts[key] || 0) + 1;
+                
+                delete answers[key]; // مسح الإجابة الخاطئة ليعيد الطالب المحاولة
+                wrongCount++;
+            }
+        }
+
+        const percent = Math.round((correct / total) * 100);
+        const resultsDiv = document.getElementById('resultsArea');
+
+        if (wrongCount > 0) {
+            // العودة لأول سؤال خطأ ليجيب عليه الطالب مرة أخرى
+            currentQuestionInOutcomeIndex = firstWrongIndex;
+            renderCurrentChapter();
+            
+            resultsDiv.innerHTML = `
+                <div class="results-card" style="border-color: #f59e0b; background: #fffbeb;">
+                    <h3 style="color: #d97706;"><i class="fas fa-exclamation-circle"></i> توجد إجابات خاطئة</h3>
+                    <div class="final-score">${correct} / ${total}</div>
+                    <p>لقد تم تحديد ${wrongCount} أسئلة خاطئة ومسح إجاباتها. يرجى المحاولة مرة أخرى، لقد عدنا بك إلى أول سؤال يحتاج لتصحيح.</p>
+                </div>
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="results-card">
+                    <h3><i class="fas fa-chart-simple"></i> نتيجة ناتج التعلم</h3>
+                    <div class="final-score">${correct} / ${total} (${percent}%)</div>
+                    <p>🎉 ممتاز! لقد أجبت على جميع الأسئلة بشكل صحيح.</p>
+                </div>
+            `;
+        }
+        updateGlobalBadge();
+    }
+
+    // إعادة تعيين إجابات الفصل الحالي
+    function resetCurrentChapter() {
+        const chapter = chaptersData.find(ch => ch.id === currentChapterId);
+        if (!chapter) return;
+        const filteredQuestions = chapter.questions.filter(q => q.outcomeIndex === selectedOutcomeIndex);
+
+        for (let q of filteredQuestions) {
+            const key = `${chapter.id}_q${q.id}`;
+            delete answers[key];
+            delete wrongAttempts[key];
+        }
+        renderCurrentChapter();
+        updateGlobalBadge();
+        document.getElementById('resultsArea').innerHTML = '';
+    }
+
+    // بناء قائمة الفصول
+    function buildSidebar() {
+        const container = document.getElementById('chapterList');
+        container.innerHTML = '';
+        chaptersData.forEach(ch => {
+            const btn = document.createElement('button');
+            btn.className = `chapter-btn ${ch.id === currentChapterId ? 'active' : ''}`;
+            btn.innerHTML = `<i class="fas fa-book"></i> ${ch.title} <i class="fas fa-chevron-left"></i>`;
+            btn.addEventListener('click', () => {
+                currentChapterId = ch.id;
+                selectedOutcomeIndex = null; // إعادة تعيين الناتج عند تغيير الفصل
+                currentQuestionInOutcomeIndex = 0;
+                renderCurrentChapter();
+                // تحديث النشاط
+                document.querySelectorAll('.chapter-btn').forEach(btn => btn.classList.remove('active'));
+                btn.classList.add('active');
+            });
+            container.appendChild(btn);
+        });
+    }
+
+    // مستمعات الأزرار
+    document.getElementById('submitAnswersBtn').addEventListener('click', () => {
+        showChapterResults();
+    });
+    
+    document.getElementById('resetChapterBtn').addEventListener('click', () => {
+        resetCurrentChapter();
+    });
+    document.getElementById('showResultsBtn').addEventListener('click', () => {
+        // عرض النتيجة النهائية لجميع الفصول
+        studentId = prompt("الرجاء إدخال اسم الطالب لاعتماده في التقرير:", studentId) || studentId;
+
+        const globalCorrect = computeGlobalScore();
+        const totalQ = totalQuestionsCount();
+        const percentAll = Math.round((globalCorrect / totalQ) * 100);
+        const resultsDiv = document.getElementById('resultsArea');
+
+        const now = new Date();
+        const reportDate = now.toLocaleDateString('ar-SA');
+        const reportTime = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+
+        let reportRows = '';
+        chaptersData.forEach(chapter => {
+            chapter.outcomes.forEach((outcomeText, outcomeIdx) => {
+                const outcomeQuestions = chapter.questions.filter(q => q.outcomeIndex === outcomeIdx);
+                const qCount = outcomeQuestions.length;
+                if (qCount === 0) return;
+
+                const correctCount = outcomeQuestions.filter(q => {
+                    const userAns = answers[`${chapter.id}_q${q.id}`];
+                    return userAns !== undefined && userAns === q.correct;
+                }).length;
+                
+                const outcomePercent = Math.round((correctCount / qCount) * 100);
+
+                reportRows += `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 0.6rem; text-align: center;">${studentId}</td>
+                        <td style="padding: 0.6rem; text-align: center;">${chapter.title}</td>
+                        <td style="padding: 0.6rem; font-size: 0.75rem;">${outcomeText}</td>
+                        <td style="padding: 0.6rem; text-align: center;">${qCount}</td>
+                        <td style="padding: 0.6rem; text-align: center;">${correctCount}</td>
+                        <td style="padding: 0.6rem; text-align: center;">${correctCount} / ${qCount}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: bold; color: ${outcomePercent >= 50 ? '#10b981' : '#ef4444'}">${outcomePercent}%</td>
+                    </tr>
+                `;
+            });
+        });
+
+        resultsDiv.innerHTML = `
+            <div class="results-card">
+                <h3><i class="fas fa-trophy"></i> النتيجة النهائية للكتيب</h3>
+                <div class="final-score">${globalCorrect} / ${totalQ} (${percentAll}%)</div>
+                <p>${percentAll >= 70 ? '🏆 إنجاز رائع! اجتياز ممتاز.' : '💪 واصل المراجعة، النجاح قريب.'}</p>
+                
+                <div style="margin-top: 2rem; background: white; border-radius: 1rem; padding: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto;">
+                    <h4 style="margin-bottom: 1rem; color: #4338ca;"><i class="fas fa-file-alt"></i> تقرير الأداء التفصيلي - ${studentId}</h4>
+                    <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: right; color: #1e293b; min-width: 600px;">
+                        <thead>
+                            <tr style="background: #f8fafc; color: #4338ca; border-bottom: 2px solid #4338ca;">
+                                <th style="padding: 0.6rem; text-align: center;">اسم الطالب</th>
+                                <th style="padding: 0.6rem; text-align: center;">المجال</th>
+                                <th style="padding: 0.6rem; text-align: center;">ناتج التعلم</th>
+                                <th style="padding: 0.6rem; text-align: center;">الأسئلة</th>
+                                <th style="padding: 0.6rem; text-align: center;">الصحيحة</th>
+                                <th style="padding: 0.6rem; text-align: center;">النتيجة</th>
+                                <th style="padding: 0.6rem; text-align: center;">النسبة</th>
+                            </tr>
+                        </thead>
+                        <tbody>${reportRows}</tbody>
+                    </table>
+                </div>
+
+                <button class="btn btn-primary" id="globalResetBtn" style="margin-top:1rem;"><i class="fas fa-rotate-right"></i> إعادة تعيين كل الإجابات</button>
+                <button class="btn btn-warning" id="savePdfBtn" style="margin-top:1rem;"><i class="fas fa-file-pdf"></i> حفظ كملف PDF</button>
+            </div>
+        `;
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([resultsDiv]);
+        }
+        const globalReset = document.getElementById('globalResetBtn');
+        if (globalReset) {
+            globalReset.addEventListener('click', () => {
+                answers = {};
+                wrongAttempts = {};
+                renderCurrentChapter();
+                updateGlobalBadge();
+                document.getElementById('resultsArea').innerHTML = '';
+            });
+        }        
+        document.getElementById('savePdfBtn').addEventListener('click', () => saveReportAsPdf(studentId));
+    });
+
+    // دالة لحفظ التقرير كملف PDF
+    async function saveReportAsPdf(studentId) {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            alert('مكتبة jsPDF غير محملة. يرجى المحاولة مرة أخرى.');
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4'
+        });
+
+        // إضافة خط يدعم اللغة العربية
+        doc.addFont('Tajawal-Regular.ttf', 'Tajawal', 'normal'); // ستحتاج إلى تضمين الخط يدوياً أو استخدام خطوط الويب
+        doc.setFont('Tajawal');
+
+        doc.setR2L(true); // لضبط اتجاه الكتابة من اليمين لليسار
+
+        doc.setFontSize(20);
+        doc.text('تقرير الأداء النهائي', 148, 20, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(`اسم الطالب/الرقم: ${studentId}`, 280, 30, { align: 'right' });
+        doc.text(`التاريخ: ${new Date().toLocaleDateString('ar-SA')}`, 280, 37, { align: 'right' });
+
+        const table = document.querySelector('.report-table');
+        if (table) {
+            doc.autoTable({
+                html: table,
+                startY: 45,
+                theme: 'grid',
+                styles: { font: 'Tajawal', fontStyle: 'normal', halign: 'right' }
+            });
+        }
+        doc.save(`تقرير_نافس_جيبوتي_${studentId}.pdf`);
+    }
+
+    // مستمع لزر شاشة البدء
+    document.getElementById('startAppBtn').addEventListener('click', () => {
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.body.style.overflow = 'auto'; // السماح بالتمرير في التطبيق
+    });
+
+    // تهيئة التطبيق
+    applyLatexFormatting();
+    distributeQuestionsToOutcomes();
+    buildSidebar();
+    updateGlobalBadge();
+    renderCurrentChapter();
+</script>
+</body>
+</html>
