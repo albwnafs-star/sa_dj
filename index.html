@@ -1240,7 +1240,7 @@
         pList.innerHTML = chapter.outcomes.map((out, idx) => {
             const outcomeQuestions = chapter.questions.filter(q => q.outcomeIndex === idx);
             const total = outcomeQuestions.length;
-            const answeredCount = outcomeQuestions.filter(q => answers[`${chapter.id}_q${q.id}`] !== undefined).length;
+            const answeredCount = outcomeQuestions.filter(q => answers[`${chapter.id}_o${idx}_q${q.id}`] !== undefined).length;
             const percent = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
             
             return `
@@ -1311,7 +1311,7 @@
 
         let questionsHtml = '';
         if (q) {
-            const key = `${chapter.id}_q${q.id}`;
+            const key = `${chapter.id}_o${q.outcomeIndex}_q${q.id}`;
             const savedAnswer = answers[key];
             const attempts = wrongAttempts[key] || 0;
             let hintHtml = '';
@@ -1330,10 +1330,10 @@
                         <span class="q-num">${currentQuestionInOutcomeIndex + 1}</span>
                         <span>${q.q}</span>
                     </div>
-                    <div class="options" id="options-${chapter.id}-${q.id}">
+                    <div class="options" id="options-${chapter.id}-${selectedOutcomeIndex}-${q.id}">
                         ${q.options.map((opt, optIdx) => `
                             <label class="option-label">
-                                <input type="radio" name="q${chapter.id}_${q.id}" value="${optIdx}" ${savedAnswer !== undefined && savedAnswer == optIdx ? 'checked' : ''}>
+                                <input type="radio" name="q${chapter.id}_o${selectedOutcomeIndex}_${q.id}" value="${optIdx}" ${savedAnswer !== undefined && savedAnswer == optIdx ? 'checked' : ''}>
                                 <span>${opt}</span>
                             </label>
                         `).join('')}
@@ -1360,15 +1360,15 @@
 
         // إضافة مستمعات لتحديث الإجابات فوراً
         if (q) {
-            const radios = container.querySelectorAll(`input[name="q${chapter.id}_${q.id}"]`);
+            const radios = container.querySelectorAll(`input[name="q${chapter.id}_o${selectedOutcomeIndex}_${q.id}"]`);
             radios.forEach(radio => {
                 radio.addEventListener('change', (e) => {
                     const selectedVal = parseInt(e.target.value);
-                    answers[`${chapter.id}_q${q.id}`] = selectedVal;
+                    answers[`${chapter.id}_o${selectedOutcomeIndex}_q${q.id}`] = selectedVal;
                     // تحديث البادج العالمية
                     updateGlobalBadge();
                     // إزالة أي رسالة خطأ
-                    const parentDiv = document.getElementById(`options-${chapter.id}-${q.id}`).closest('.question-item');
+                    const parentDiv = document.getElementById(`options-${chapter.id}-${selectedOutcomeIndex}-${q.id}`).closest('.question-item');
                     const feedbackDiv = parentDiv.querySelector('.answer-feedback');
                     if (feedbackDiv) feedbackDiv.innerHTML = '';
                     updateProgress();
@@ -1396,7 +1396,7 @@
 
         function updateProgress() {
             const totalQ = filteredQuestions.length;
-        const answeredCount = filteredQuestions.filter(q => answers[`${chapter.id}_q${q.id}`] !== undefined).length;
+        const answeredCount = filteredQuestions.filter(q => answers[`${chapter.id}_o${selectedOutcomeIndex}_q${q.id}`] !== undefined).length;
             document.getElementById('progressIndicator').innerHTML = `<i class="fas fa-list-ol"></i> سؤال ${currentQuestionInOutcomeIndex + 1} من ${totalQ} | <i class="fas fa-check-circle"></i> المكتمل: ${answeredCount}`;
 
             // تحديث شريط التقدم المرئي
@@ -1423,7 +1423,7 @@
 
         for (let i = 0; i < filteredQuestions.length; i++) {
             const q = filteredQuestions[i];
-            const key = `${chapter.id}_q${q.id}`;
+            const key = `${chapter.id}_o${selectedOutcomeIndex}_q${q.id}`;
             const ans = answers[key];
             if (ans !== undefined && ans === q.correct) {
                 correct++;
@@ -1473,7 +1473,7 @@
         const filteredQuestions = chapter.questions.filter(q => q.outcomeIndex === selectedOutcomeIndex);
 
         for (let q of filteredQuestions) {
-            const key = `${chapter.id}_q${q.id}`;
+            const key = `${chapter.id}_o${selectedOutcomeIndex}_q${q.id}`;
             delete answers[key];
             delete wrongAttempts[key];
         }
@@ -1532,7 +1532,7 @@
                 if (qCount === 0) return;
 
                 const correctCount = outcomeQuestions.filter(q => {
-                    const userAns = answers[`${chapter.id}_q${q.id}`];
+                    const userAns = answers[`${chapter.id}_o${outcomeIdx}_q${q.id}`];
                     return userAns !== undefined && userAns === q.correct;
                 }).length;
                 
